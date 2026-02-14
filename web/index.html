@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>사다리 게임</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/style.css?v=4">
-    <link rel="stylesheet" href="css/goals.css?v=4">
-    <link rel="stylesheet" href="css/scheduler.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/goals.css?v=5">
+    <link rel="stylesheet" href="css/scheduler.css?v=4">
 </head>
 
 <body>
@@ -51,24 +51,38 @@
 
         <!-- Omok Setup Screen -->
         <div id="omok-screen" class="screen hidden">
-            <h1>⚫ 오목 게임 ⚪</h1>
-            <div class="mode-selection">
-                <button class="btn-primary" onclick="showOmokLevelSelect()">혼자 하기 (AI)</button>
-                <button class="btn-secondary" onclick="showOmokPvpRoom()">친구랑 하기</button>
-                <button class="btn-small" onclick="backToStart()">돌아가기</button>
-            </div>
-            <!-- PvP Room Code + Color Selection -->
-            <div id="omok-pvp-room" class="pvp-room-section hidden">
-                <h3>온라인 대결 설정</h3>
-                <div class="room-code-input" style="margin-bottom:15px">
-                    <input type="text" id="omok-room-code" placeholder="방 코드 (예: 1234)" maxlength="10">
+            <div class="game-mode-select">
+                <h2>⚫ 오목 게임 ⚪</h2>
+                <!-- Mode Selection Step -->
+                <div id="omok-mode-step">
+                    <p class="game-mode-subtitle">상대를 선택하세요!</p>
+                    <div class="game-mode-cards">
+                        <div class="mode-card" onclick="showOmokLevelSelect()">
+                            <div class="mode-characters">🤖</div>
+                            <h3>컴퓨터와 대결</h3>
+                            <p>난이도를 선택!</p>
+                        </div>
+                        <div class="mode-card" onclick="showOmokPvpStep()">
+                            <div class="mode-characters">👫</div>
+                            <h3>친구와 대결</h3>
+                            <p>온라인으로 대결!</p>
+                        </div>
+                    </div>
                 </div>
-                <p>색상을 선택하세요</p>
-                <div class="color-select-row">
-                    <button class="color-btn selected" id="omok-color-b" onclick="selectOmokColor('b')">⚫ 흑돌 (선공)</button>
-                    <button class="color-btn" id="omok-color-w" onclick="selectOmokColor('w')">⚪ 백돌</button>
+                <!-- PvP Room Code + Color Selection Step -->
+                <div id="omok-pvp-step" class="hidden">
+                    <h3>온라인 대결 설정</h3>
+                    <div class="room-code-input" style="margin-bottom:15px">
+                        <input type="text" id="omok-room-code" placeholder="방 코드 (예: 1234)" maxlength="10">
+                    </div>
+                    <p>색상을 선택하세요</p>
+                    <div class="color-select-row">
+                        <button class="color-btn selected" id="omok-color-b" onclick="selectOmokColor('b')">⚫ 흑돌 (선공)</button>
+                        <button class="color-btn" id="omok-color-w" onclick="selectOmokColor('w')">⚪ 백돌</button>
+                    </div>
+                    <button class="btn-primary" onclick="joinOmokRoom()" style="margin-top:15px">입장</button>
                 </div>
-                <button class="btn-primary" onclick="joinOmokRoom()" style="margin-top:15px">입장</button>
+                <button class="btn-small" onclick="backFromOmokStep()" style="margin-top:20px">← 돌아가기</button>
             </div>
         </div>
 

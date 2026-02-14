@@ -119,8 +119,9 @@ function sendOmokUpdate() {
 // Exports for Main UI
 window.startOmokGame = (mode, level) => initOmokGame(mode, level);
 
-window.showOmokPvpRoom = function () {
-    document.getElementById('omok-pvp-room').classList.remove('hidden');
+window.showOmokPvpStep = function () {
+    document.getElementById('omok-mode-step').classList.add('hidden');
+    document.getElementById('omok-pvp-step').classList.remove('hidden');
 };
 
 window.selectOmokColor = function (color) {
@@ -136,7 +137,7 @@ window.joinOmokRoom = function () {
         return;
     }
     omokRoomId = 'omok_room_' + code;
-    document.getElementById('omok-pvp-room').classList.add('hidden');
+    document.getElementById('omok-pvp-step').classList.add('hidden');
     initOmokGame('pvp');
     window.showOmokBoard();
 };

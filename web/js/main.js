@@ -1028,9 +1028,9 @@ window.hideWalletSummary = function () {
 window.showOmokScreen = function () {
     document.getElementById('start-screen').classList.remove('active');
     document.getElementById('start-screen').classList.add('hidden');
-    // Reset PvP room UI
-    const pvpRoom = document.getElementById('omok-pvp-room');
-    if (pvpRoom) pvpRoom.classList.add('hidden');
+    // Reset to mode step
+    document.getElementById('omok-mode-step').classList.remove('hidden');
+    document.getElementById('omok-pvp-step').classList.add('hidden');
     document.getElementById('omok-screen').classList.remove('hidden');
     document.getElementById('omok-screen').classList.add('active');
 };
@@ -1060,6 +1060,7 @@ window.backToStartFromOmok = function () {
 };
 
 function showOmokLevelSelect() {
+    document.getElementById('omok-mode-step').classList.add('hidden');
     document.getElementById('omok-screen').classList.add('hidden');
     document.getElementById('omok-level-screen').classList.remove('hidden');
     document.getElementById('omok-level-screen').classList.add('active');
@@ -1067,8 +1068,21 @@ function showOmokLevelSelect() {
 
 function backToOmokMode() {
     document.getElementById('omok-level-screen').classList.add('hidden');
+    document.getElementById('omok-level-screen').classList.remove('active');
+    document.getElementById('omok-mode-step').classList.remove('hidden');
     document.getElementById('omok-screen').classList.remove('hidden');
+    document.getElementById('omok-screen').classList.add('active');
 }
+
+window.backFromOmokStep = function () {
+    const pvpStep = document.getElementById('omok-pvp-step');
+    if (pvpStep && !pvpStep.classList.contains('hidden')) {
+        pvpStep.classList.add('hidden');
+        document.getElementById('omok-mode-step').classList.remove('hidden');
+    } else {
+        backToStart();
+    }
+};
 
 window.showOmokLevelSelect = showOmokLevelSelect;
 window.backToOmokMode = backToOmokMode;
