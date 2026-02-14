@@ -263,9 +263,11 @@ function slideMoves(board, color, from, dr, dc, moves) {
 // ============================================================
 function findKing(board, color) {
     const king = color === 'w' ? 'K' : 'k';
-    for (let r = 0; r < 8; r++)
+    for (let r = 0; r < 8; r++) {
+        if (!board[r]) continue;
         for (let c = 0; c < 8; c++)
             if (board[r][c] === king) return { row: r, col: c };
+    }
     return null;
 }
 
@@ -827,29 +829,32 @@ function initChessMultiplayer() {
     // Listen for updates
     onValue(gameRef, (snapshot) => {
         const data = snapshot.val();
-        if (data) {
-            // Check if board changed
-            if (data.board && JSON.stringify(chess.board) !== JSON.stringify(data.board) || chess.turn !== data.turn) {
-                // Validate board structure to prevent crashes
-                if (Array.isArray(data.board) && data.board.length === 8) {
-                    chess.board = data.board.map(row => Array.isArray(row) ? row : Array(8).fill(null));
-                } else {
-                    // If invalid, don't update local board to avoid crash, or reset?
-                    // Let's keep local if remote is weird, or reset if needed.
-                    // For now, minimal safety.
-                }
+        if (!data || !data.board) return;
 
-                chess.turn = data.turn || 'w';
-                chess.lastMove = data.lastMove;
-                chess.gameOver = data.gameOver;
-                chess.capturedWhite = data.capturedWhite || [];
-                chess.capturedBlack = data.capturedBlack || [];
-
-                renderChessBoard();
-                updateChessStatus();
+        // Reconstruct 8x8 board from Firebase data (handles sparse objects)
+        const rawBoard = data.board;
+        const newBoard = [];
+        for (let r = 0; r < 8; r++) {
+            const newRow = [];
+            const rawRow = rawBoard[r] || [];
+            for (let c = 0; c < 8; c++) {
+                newRow.push(rawRow[c] || null);
             }
-
+            newBoard.push(newRow);
         }
+
+        // Only update if something changed
+        if (JSON.stringify(chess.board) === JSON.stringify(newBoard) && chess.turn === data.turn) return;
+
+        chess.board = newBoard;
+        chess.turn = data.turn || 'w';
+        chess.lastMove = data.lastMove || null;
+        chess.gameOver = data.gameOver || false;
+        chess.capturedWhite = data.capturedWhite || [];
+        chess.capturedBlack = data.capturedBlack || [];
+
+        renderChessBoard();
+        updateChessStatus();
     });
 }
 
