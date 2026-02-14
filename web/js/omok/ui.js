@@ -41,11 +41,22 @@ export function updateStatus() {
     if (!statusEl) return;
 
     if (omokState.gameOver) {
-        statusEl.innerText = omokState.winner === 'b' ? '🎉 흑돌 승리!' : '🎉 백돌 승리!';
+        if (omokState.mode === 'pvp') {
+            const iWin = omokState.winner === omokState.myColor;
+            statusEl.innerText = iWin ? '🎉 승리했어요!' : '😢 졌어요...';
+        } else {
+            statusEl.innerText = omokState.winner === 'b' ? '🎉 흑돌 승리!' : '🎉 백돌 승리!';
+        }
         statusEl.classList.add('highlight');
         showVictoryModal();
     } else {
-        statusEl.innerText = omokState.turn === 'b' ? '⚫ 흑돌 차례' : '⚪ 백돌 차례';
+        if (omokState.mode === 'pvp') {
+            statusEl.innerText = omokState.turn === omokState.myColor
+                ? '내 차례입니다'
+                : '상대방 차례입니다';
+        } else {
+            statusEl.innerText = omokState.turn === 'b' ? '⚫ 흑돌 차례' : '⚪ 백돌 차례';
+        }
         statusEl.classList.remove('highlight');
     }
 }

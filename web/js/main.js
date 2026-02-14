@@ -122,6 +122,7 @@ let gameState = {
     // Family mode
     currentRound: 0,
     totalRounds: 3,
+    familyResults: [],  // Collect results from each round for report
     player: '', avatar: '', category: '', categoryName: '', categoryIcon: '',
     selected: false,
     // General mode
@@ -158,6 +159,11 @@ function switchScreen(from, to) {
 // ============================================================
 function startFamilyGame() {
     gameState.mode = 'family';
+    gameState.familyResults = [];
+    // Show family-specific buttons
+    document.getElementById('btn-edit-game').style.display = '';
+    document.getElementById('btn-prev-round').style.display = '';
+    document.getElementById('btn-next-round').style.display = '';
     loadFamilyRound(0);
     switchScreen(startScreen, gameScreen);
     setTimeout(resizeCanvas, 100);
@@ -233,6 +239,10 @@ function startGeneralGame() {
     gameState.mode = 'general';
     gameState.players = players;
     gameState.finishedPlayers = new Set();
+    // Hide family-specific buttons
+    document.getElementById('btn-edit-game').style.display = 'none';
+    document.getElementById('btn-prev-round').style.display = 'none';
+    document.getElementById('btn-next-round').style.display = 'none';
 
     // Shuffle items for random bottom placement
     const shuffled = [...items];
@@ -450,6 +460,15 @@ function runFamilyLadder(entryIndex) {
 function showFamilyResult(resultColIdx) {
     const result = gameState.results[resultColIdx];
 
+    // Collect result for report
+    gameState.familyResults.push({
+        player: gameState.player,
+        avatar: gameState.avatar,
+        categoryName: gameState.categoryName,
+        categoryIcon: gameState.categoryIcon,
+        result: result.display
+    });
+
     const resultNode = document.getElementById(`result-${resultColIdx}`);
     resultNode.classList.remove('covered');
     resultNode.innerText = result.display;
@@ -477,7 +496,8 @@ function showFamilyResult(resultColIdx) {
         if (gameState.currentRound < gameState.totalRounds - 1) {
             btnArea.innerHTML = '<button class="btn-primary" onclick="nextFamilyRound()">다음 라운드 →</button>';
         } else {
-            btnArea.innerHTML = '<button class="btn-primary" onclick="location.reload()">게임 종료!</button>';
+            // Show final report
+            btnArea.innerHTML = '<button class="btn-primary" onclick="showFamilyReport()">결과 보기</button>';
         }
 
         document.getElementById('result-modal').classList.remove('hidden');
@@ -487,6 +507,42 @@ function showFamilyResult(resultColIdx) {
 function nextFamilyRound() {
     document.getElementById('result-modal').classList.add('hidden');
     loadFamilyRound(gameState.currentRound + 1);
+}
+
+function prevFamilyRound() {
+    if (gameState.currentRound > 0) {
+        loadFamilyRound(gameState.currentRound - 1);
+    }
+}
+
+function skipToNextRound() {
+    if (gameState.currentRound < gameState.totalRounds - 1) {
+        loadFamilyRound(gameState.currentRound + 1);
+    }
+}
+
+function showFamilyReport() {
+    document.getElementById('result-modal').classList.add('hidden');
+    const modal = document.getElementById('result-modal');
+    document.getElementById('modal-player-name').innerText = '게임 리포트';
+    document.getElementById('modal-result-icon').innerText = '📊';
+    document.getElementById('modal-result-text').innerText = '오늘의 결과';
+
+    const mDetails = document.getElementById('modal-details');
+    mDetails.classList.remove('hidden');
+    let html = '<div style="text-align:left">';
+    gameState.familyResults.forEach((r, i) => {
+        html += `<div style="padding:10px;margin-bottom:8px;background:#f0f0f0;border-radius:10px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:1.5rem">${r.avatar}</span>
+            <div><b>${r.player}</b> - ${r.categoryIcon} ${r.categoryName}<br>
+            <span style="color:#FF6B6B;font-weight:bold;font-size:1.1rem">${r.result}</span></div>
+        </div>`;
+    });
+    html += '</div>';
+    mDetails.innerHTML = html;
+
+    document.getElementById('modal-btn-area').innerHTML = '<button class="btn-primary" onclick="backToStart(); closeModal();">처음으로</button>';
+    modal.classList.remove('hidden');
 }
 
 // ============================================================
@@ -1037,6 +1093,10 @@ window.backToStartFromChess = backToStartFromChess;
 window.changeCount = changeCount;
 window.startGeneralGame = startGeneralGame;
 window.nextFamilyRound = nextFamilyRound;
+window.prevFamilyRound = prevFamilyRound;
+window.skipToNextRound = skipToNextRound;
+window.showFamilyReport = showFamilyReport;
+window.closeModal = closeModal;
 window.switchChildTab = switchChildTab;
 window.handleTaskCheck = handleTaskCheck;
 window.openSettings = openSettings;

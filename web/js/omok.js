@@ -8,10 +8,12 @@ import { getAiMove } from './omok/ai.js';
 import { renderBoard, updateStatus } from './omok/ui.js';
 
 let omokRoomId = 'omok_room_default';
+let myOmokColor = 'b'; // Default: black (first player)
 
 // Initialize Game
 export function initOmokGame(mode, level = 1) {
     resetState(mode, level);
+    omokState.myColor = myOmokColor;
     renderBoard();
     updateStatus();
 
@@ -28,6 +30,9 @@ export function handleOmokClick(r, c) {
 
     // AI Check
     if (omokState.mode === 'ai' && omokState.turn !== 'b') return;
+
+    // PvP: only allow your own color
+    if (omokState.mode === 'pvp' && omokState.turn !== myOmokColor) return;
 
     // Rule Check (Forbidden Moves for Black)
     if (omokState.turn === 'b' && isForbidden(r, c, 'b')) {
@@ -116,6 +121,12 @@ window.startOmokGame = (mode, level) => initOmokGame(mode, level);
 
 window.showOmokPvpRoom = function () {
     document.getElementById('omok-pvp-room').classList.remove('hidden');
+};
+
+window.selectOmokColor = function (color) {
+    myOmokColor = color;
+    document.getElementById('omok-color-b').classList.toggle('selected', color === 'b');
+    document.getElementById('omok-color-w').classList.toggle('selected', color === 'w');
 };
 
 window.joinOmokRoom = function () {

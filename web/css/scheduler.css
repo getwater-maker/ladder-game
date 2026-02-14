@@ -13,17 +13,65 @@
 
 .scheduler-header {
     display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.scheduler-header-top {
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+}
+
+.scheduler-header-buttons {
+    display: flex;
+    gap: 5px;
 }
 
 .month-nav {
     display: flex;
     align-items: center;
-    gap: 20px;
-    font-size: 1.5rem;
+    gap: 15px;
+    font-size: 1.3rem;
     font-weight: bold;
+}
+
+.btn-today {
+    padding: 4px 12px;
+    border: 1px solid var(--primary-color);
+    border-radius: 15px;
+    background: white;
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-today:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.scheduler-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.settlement-display {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+}
+
+.settlement-item {
+    cursor: pointer;
+    padding: 4px 10px;
+    background: #e8f5e9;
+    border-radius: 8px;
+    color: #2e7d32;
 }
 
 .nav-btn {

@@ -592,6 +592,9 @@ function onChessSquareClick(row, col) {
     // In AI mode, only allow clicks on white's turn
     if (chess.mode === 'ai' && chess.turn !== 'w') return;
 
+    // In PvP mode, only allow clicks for your own color
+    if (chess.mode === 'pvp' && chess.turn !== myColor) return;
+
     const piece = chess.board[row][col];
 
     if (chess.selectedSquare) {
@@ -661,28 +664,39 @@ function updateChessStatus() {
     const status = getGameStatus(chess.board, chess.turn);
     const levelNames = { 1: '🐣', 2: '🐥', 3: '🦅' };
     const levelTag = chess.mode === 'ai' ? ` [Lv.${chess.aiLevel}${levelNames[chess.aiLevel] || ''}]` : '';
-    const whiteName = chess.mode === 'ai' ? '당신' : '흰색';
-    const blackName = chess.mode === 'ai' ? `컴퓨터${levelTag}` : '검은색';
+
+    // Name display logic
+    let turnName, opponentName;
+    if (chess.mode === 'ai') {
+        turnName = chess.turn === 'w' ? '당신' : `컴퓨터${levelTag}`;
+        opponentName = chess.turn === 'w' ? `컴퓨터${levelTag}` : '당신';
+    } else if (chess.mode === 'pvp') {
+        turnName = chess.turn === myColor ? '내' : '상대방';
+        opponentName = chess.turn === myColor ? '상대방' : '내';
+    } else {
+        turnName = chess.turn === 'w' ? '흰색' : '검은색';
+        opponentName = chess.turn === 'w' ? '검은색' : '흰색';
+    }
 
     switch (status) {
         case 'checkmate':
             chess.gameOver = true;
-            if (chess.turn === 'b') {
-                statusEl.textContent = chess.mode === 'ai'
-                    ? '🎉 축하합니다! 이겼어요!'
-                    : '🎉 흰색이 이겼어요!';
+            // The side in checkmate (chess.turn) lost
+            if (chess.mode === 'pvp') {
+                const iWin = chess.turn !== myColor;
+                statusEl.textContent = iWin ? '🎉 축하합니다! 이겼어요!' : '😢 졌어요...';
                 showChessGameOver(
-                    chess.mode === 'ai' ? '🏆 승리!' : '🏆 흰색 승리!',
-                    chess.mode === 'ai' ? '정말 잘했어요!' : '흰색 플레이어가 이겼습니다!'
+                    iWin ? '🏆 승리!' : '😢 패배',
+                    iWin ? '정말 잘했어요!' : '다시 도전해 보세요!'
                 );
-            } else {
-                statusEl.textContent = chess.mode === 'ai'
-                    ? '😢 컴퓨터가 이겼어요'
-                    : '🎉 검은색이 이겼어요!';
-                showChessGameOver(
-                    chess.mode === 'ai' ? '😢 패배' : '🏆 검은색 승리!',
-                    chess.mode === 'ai' ? '다시 도전해 보세요!' : '검은색 플레이어가 이겼습니다!'
-                );
+            } else if (chess.mode === 'ai') {
+                if (chess.turn === 'b') {
+                    statusEl.textContent = '🎉 축하합니다! 이겼어요!';
+                    showChessGameOver('🏆 승리!', '정말 잘했어요!');
+                } else {
+                    statusEl.textContent = '😢 컴퓨터가 이겼어요';
+                    showChessGameOver('😢 패배', '다시 도전해 보세요!');
+                }
             }
             statusEl.className = 'chess-status';
             break;
@@ -693,16 +707,28 @@ function updateChessStatus() {
             statusEl.className = 'chess-status';
             break;
         case 'check':
-            statusEl.textContent = chess.turn === 'w'
-                ? `⚠️ 체크! ${whiteName}의 왕을 지키세요!`
-                : `⚠️ 체크! ${blackName}의 왕이 위험해요`;
+            if (chess.mode === 'pvp') {
+                statusEl.textContent = chess.turn === myColor
+                    ? '⚠️ 체크! 왕을 지키세요!'
+                    : '⚠️ 상대방이 체크 상태입니다!';
+            } else {
+                statusEl.textContent = chess.turn === 'w'
+                    ? `⚠️ 체크! 왕을 지키세요!`
+                    : `⚠️ 체크! 왕이 위험해요`;
+            }
             statusEl.className = 'chess-status check';
             showCheckAlert();
             break;
         default:
-            statusEl.textContent = chess.turn === 'w'
-                ? `${whiteName}의 차례입니다 (흰색)`
-                : `${blackName}의 차례입니다 (검은색)`;
+            if (chess.mode === 'pvp') {
+                statusEl.textContent = chess.turn === myColor
+                    ? '내 차례입니다'
+                    : '상대방 차례입니다';
+            } else {
+                statusEl.textContent = chess.turn === 'w'
+                    ? `당신의 차례입니다 (흰색)`
+                    : `${chess.mode === 'ai' ? '컴퓨터' + levelTag : '검은색'}의 차례입니다`;
+            }
             statusEl.className = 'chess-status';
     }
 }
@@ -900,6 +926,12 @@ window.showAiLevelSelect = function () {
 window.showChessPvpRoom = function () {
     document.getElementById('chess-mode-step').classList.add('hidden');
     document.getElementById('chess-pvp-step').classList.remove('hidden');
+};
+
+window.selectChessColor = function (color) {
+    myColor = color;
+    document.getElementById('chess-color-w').classList.toggle('selected', color === 'w');
+    document.getElementById('chess-color-b').classList.toggle('selected', color === 'b');
 };
 
 window.joinChessRoom = function () {

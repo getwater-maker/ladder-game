@@ -7,7 +7,8 @@ export const omokState = {
     level: 1,
     gameOver: false,
     winner: null,
-    lastMove: null // {r, c}
+    lastMove: null, // {r, c}
+    myColor: 'b' // For PvP: which color am I
 };
 
 export function resetState(mode, level) {

@@ -184,10 +184,53 @@ async function renderScheduler() {
 
     const balance = await getWalletBalance(currentChild);
     document.getElementById('scheduler-wallet').innerText = balance.toLocaleString() + '원';
+
+    // Calculate weekly settlement
+    let weekTotal = 0;
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(startOfWeek);
+        d.setDate(d.getDate() + i);
+        const dd = String(d.getDate()).padStart(2, '0');
+        const savedData = weekGoals[i] || {};
+        const dayData = savedData[dd] && savedData[dd][currentChild] ? savedData[dd][currentChild] : {};
+        taskList.forEach(task => {
+            const max = task.maxQty || 1;
+            const val = dayData[task.id];
+            let count = 0;
+            if (val === true) count = max;
+            else if (typeof val === 'number') count = val;
+            weekTotal += count * task.reward;
+        });
+    }
+    const weekEl = document.getElementById('week-settlement');
+    if (weekEl) weekEl.innerText = weekTotal.toLocaleString() + '원';
+
+    // Calculate monthly settlement
+    const monthYear = startOfWeek.getFullYear();
+    const monthNum = String(startOfWeek.getMonth() + 1).padStart(2, '0');
+    try {
+        const monthData = await getGoals(monthYear, monthNum);
+        let monthTotal = 0;
+        if (monthData) {
+            Object.keys(monthData).forEach(dd => {
+                const dayData = monthData[dd] && monthData[dd][currentChild] ? monthData[dd][currentChild] : {};
+                taskList.forEach(task => {
+                    const max = task.maxQty || 1;
+                    const val = dayData[task.id];
+                    let count = 0;
+                    if (val === true) count = max;
+                    else if (typeof val === 'number') count = val;
+                    monthTotal += count * task.reward;
+                });
+            });
+        }
+        const monthEl = document.getElementById('month-settlement');
+        if (monthEl) monthEl.innerText = monthTotal.toLocaleString() + '원';
+    } catch (e) { console.error('Month settlement error', e); }
 }
 
 function toDateString(d) {
-    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 // Global Handler for Qty Update
@@ -257,6 +300,16 @@ window.switchSchedulerTab = function (childName) {
     });
     renderScheduler();
 }
+
+window.goToday = function () {
+    currentSchedulerDate = new Date();
+    renderScheduler();
+};
+
+window.showSettlement = function (type) {
+    const el = document.getElementById(type === 'week' ? 'week-settlement' : 'month-settlement');
+    if (el) alert(`${type === 'week' ? '주간' : '월간'} 정산: ${el.innerText}`);
+};
 
 // Assign globals
 window.openScheduler = openScheduler;
