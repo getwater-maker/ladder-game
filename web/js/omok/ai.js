@@ -1,56 +1,222 @@
 import { omokState, OMOK_SIZE } from './state.js';
 import { checkWin, isForbidden } from './rules.js';
 
+const DIRS = [[0, 1], [1, 0], [1, 1], [1, -1]];
+
 export function getAiMove() {
     if (omokState.gameOver) return null;
 
     const level = omokState.level || 1;
 
-    // Level 1-2: Random
+    // Level 1-2: 30% random
     if (level <= 2 && Math.random() < 0.3) {
         return findRandomMove();
     }
 
-    // 1. Check Forced Wins (My 4 -> 5)
-    let winMove = findForcedMove('w', 4);
+    // Always check forced wins/blocks first
+    const winMove = findForcedMove('w', 4);
     if (winMove) return winMove;
 
-    // 2. Block Critical Threats (Opp 4 -> 5)
-    let blockMove = findForcedMove('b', 4);
+    const blockMove = findForcedMove('b', 4);
     if (blockMove) return blockMove;
 
-    // Level 3+: Check 3s (My 3 -> 4)
+    // Level 3+: check open-3 attacks and blocks
     if (level >= 3) {
-        let my3 = findForcedMove('w', 3, true);
+        const my3 = findForcedMove('w', 3, true);
         if (my3) return my3;
-
-        let block3 = findForcedMove('b', 3, true);
+        const block3 = findForcedMove('b', 3, true);
         if (block3) return block3;
     }
 
-    // Heuristic Score
-    const moves = [];
+    // Level 9+: minimax search for strongest play
+    if (level >= 9) {
+        const depth = level >= 11 ? 4 : (level >= 9 ? 2 : 1);
+        return minimaxRoot(depth);
+    }
+
+    // Level 1-8: heuristic with randomness
+    const candidates = getCandidateMoves();
+    if (candidates.length === 0) return findRandomMove();
+
+    const scored = candidates.map(({ r, c }) => ({
+        r, c,
+        score: evaluatePosition(r, c, 'w') + evaluatePosition(r, c, 'b') * 0.95
+    }));
+    scored.sort((a, b) => b.score - a.score);
+
+    const topN = Math.max(1, 13 - level);
+    const pickIndex = Math.floor(Math.random() * Math.min(topN, scored.length));
+    return scored[pickIndex];
+}
+
+// Get candidate moves (near existing stones only for efficiency)
+function getCandidateMoves() {
+    const candidates = [];
+    const hasStone = new Set();
+
     for (let r = 0; r < OMOK_SIZE; r++) {
         for (let c = 0; c < OMOK_SIZE; c++) {
-            if (!omokState.board[r][c] && !isForbidden(r, c, 'w')) { // Check rules for AI too? AI is White usually.
-                // White doesn't have forbidden moves usually, but if we play Black AI, we should check.
-                // Assuming AI is White ('w') in 'ai' mode.
-
-                const score = evaluatePosition(r, c, 'w') + (evaluatePosition(r, c, 'b') * 0.95);
-                moves.push({ r, c, score });
-            }
+            if (omokState.board[r][c]) hasStone.add(`${r},${c}`);
         }
     }
 
-    moves.sort((a, b) => b.score - a.score);
+    if (hasStone.size === 0) return [{ r: 7, c: 7 }];
 
-    let topN = Math.max(1, 13 - level);
-    if (moves.length > 0) {
-        const pickIndex = Math.floor(Math.random() * Math.min(topN, moves.length));
-        return moves[pickIndex];
+    const seen = new Set();
+    for (const key of hasStone) {
+        const [sr, sc] = key.split(',').map(Number);
+        for (let dr = -2; dr <= 2; dr++) {
+            for (let dc = -2; dc <= 2; dc++) {
+                const nr = sr + dr, nc = sc + dc;
+                if (nr < 0 || nr >= OMOK_SIZE || nc < 0 || nc >= OMOK_SIZE) continue;
+                if (omokState.board[nr][nc]) continue;
+                const k = `${nr},${nc}`;
+                if (seen.has(k)) continue;
+                seen.add(k);
+                candidates.push({ r: nr, c: nc });
+            }
+        }
     }
+    return candidates;
+}
 
-    return findRandomMove();
+// Minimax with alpha-beta for high levels
+function minimaxRoot(depth) {
+    const candidates = getCandidateMoves();
+    if (candidates.length === 0) return findRandomMove();
+
+    // Pre-score and limit candidates for performance
+    const scored = candidates.map(({ r, c }) => ({
+        r, c,
+        score: evaluatePosition(r, c, 'w') + evaluatePosition(r, c, 'b') * 0.9
+    }));
+    scored.sort((a, b) => b.score - a.score);
+    const topMoves = scored.slice(0, 15); // Only search top 15
+
+    let bestMove = topMoves[0];
+    let bestScore = -Infinity;
+
+    for (const m of topMoves) {
+        omokState.board[m.r][m.c] = 'w';
+        if (checkWin(m.r, m.c, 'w')) {
+            omokState.board[m.r][m.c] = null;
+            return m;
+        }
+        const score = minimax(depth - 1, -Infinity, Infinity, false);
+        omokState.board[m.r][m.c] = null;
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = m;
+        }
+    }
+    return bestMove;
+}
+
+function minimax(depth, alpha, beta, isMax) {
+    if (depth === 0) return evaluateBoard();
+
+    const color = isMax ? 'w' : 'b';
+    const candidates = getCandidateMoves();
+    if (candidates.length === 0) return 0;
+
+    // Pre-score and limit for performance
+    const scored = candidates.map(({ r, c }) => ({
+        r, c,
+        score: evaluatePosition(r, c, color) + evaluatePosition(r, c, color === 'w' ? 'b' : 'w') * 0.8
+    }));
+    scored.sort((a, b) => b.score - a.score);
+    const topMoves = scored.slice(0, 10);
+
+    if (isMax) {
+        let best = -Infinity;
+        for (const m of topMoves) {
+            omokState.board[m.r][m.c] = 'w';
+            if (checkWin(m.r, m.c, 'w')) {
+                omokState.board[m.r][m.c] = null;
+                return 100000;
+            }
+            best = Math.max(best, minimax(depth - 1, alpha, beta, false));
+            omokState.board[m.r][m.c] = null;
+            alpha = Math.max(alpha, best);
+            if (beta <= alpha) break;
+        }
+        return best;
+    } else {
+        let best = Infinity;
+        for (const m of topMoves) {
+            omokState.board[m.r][m.c] = 'b';
+            if (checkWin(m.r, m.c, 'b')) {
+                omokState.board[m.r][m.c] = null;
+                return -100000;
+            }
+            best = Math.min(best, minimax(depth - 1, alpha, beta, true));
+            omokState.board[m.r][m.c] = null;
+            beta = Math.min(beta, best);
+            if (beta <= alpha) break;
+        }
+        return best;
+    }
+}
+
+// Board evaluation for minimax
+function evaluateBoard() {
+    let score = 0;
+    for (let r = 0; r < OMOK_SIZE; r++) {
+        for (let c = 0; c < OMOK_SIZE; c++) {
+            if (!omokState.board[r][c]) continue;
+            if (omokState.board[r][c] === 'w') {
+                score += evaluateStone(r, c, 'w');
+            } else {
+                score -= evaluateStone(r, c, 'b');
+            }
+        }
+    }
+    return score;
+}
+
+function evaluateStone(r, c, color) {
+    let total = 0;
+    const opp = color === 'w' ? 'b' : 'w';
+    for (const [dr, dc] of DIRS) {
+        let count = 1;
+        let openEnds = 0;
+        // Forward
+        let nr = r + dr, nc = c + dc;
+        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) {
+            count++; nr += dr; nc += dc;
+        }
+        if (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && !omokState.board[nr][nc]) openEnds++;
+        // Backward
+        nr = r - dr; nc = c - dc;
+        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) {
+            count++; nr -= dr; nc -= dc;
+        }
+        if (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && !omokState.board[nr][nc]) openEnds++;
+
+        total += patternScore(count, openEnds);
+    }
+    return total;
+}
+
+function patternScore(count, openEnds) {
+    if (count >= 5) return 100000;
+    if (count === 4) {
+        if (openEnds === 2) return 50000;  // open 4 = almost win
+        if (openEnds === 1) return 5000;   // half-open 4
+        return 0;
+    }
+    if (count === 3) {
+        if (openEnds === 2) return 3000;   // open 3 = strong threat
+        if (openEnds === 1) return 500;
+        return 0;
+    }
+    if (count === 2) {
+        if (openEnds === 2) return 200;
+        if (openEnds === 1) return 50;
+        return 0;
+    }
+    if (count === 1 && openEnds === 2) return 10;
+    return 0;
 }
 
 function findRandomMove() {
@@ -60,53 +226,59 @@ function findRandomMove() {
             if (!omokState.board[r][c]) empty.push({ r, c });
         }
     }
-    if (empty.length > 0) {
-        return empty[Math.floor(Math.random() * empty.length)];
-    }
-    return null;
+    return empty.length > 0 ? empty[Math.floor(Math.random() * empty.length)] : null;
 }
 
 function findForcedMove(color, count, openEnds = false) {
     for (let r = 0; r < OMOK_SIZE; r++) {
         for (let c = 0; c < OMOK_SIZE; c++) {
-            if (!omokState.board[r][c]) {
-                // Skip if forbidden for Black AI (if we were black)
-                // But AI is White.
+            if (omokState.board[r][c]) continue;
 
-                omokState.board[r][c] = color;
-
-                // Simplified "count in a row" check
-                const maxCount = getMaxCount(r, c, color);
-
-                // If we need open ends (e.g. open 3), check ends
-                let valid = false;
-                if (openEnds) {
-                    // Simplified: Just check if maxCount matches
-                    // A real open-check is expensive here, trust heuristics later.
-                    // But for block logic, if it makes 4, we must likely block.
-                    if (maxCount >= count) valid = true; // Not strictly 'open' check
-                } else {
-                    if (maxCount >= count) valid = true;
-                }
-
-                omokState.board[r][c] = null;
-
-                if (valid) return { r, c };
+            omokState.board[r][c] = color;
+            const maxCount = getMaxCount(r, c, color);
+            let valid = false;
+            if (openEnds) {
+                if (maxCount >= count && hasOpenEnds(r, c, color, count)) valid = true;
+            } else {
+                if (maxCount >= count) valid = true;
             }
+            omokState.board[r][c] = null;
+            if (valid) return { r, c };
         }
     }
     return null;
 }
 
-function getMaxCount(r, c, color) {
-    let max = 0;
-    const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
-    for (const [dr, dc] of directions) {
+function hasOpenEnds(r, c, color, targetCount) {
+    for (const [dr, dc] of DIRS) {
         let count = 1;
         let nr = r + dr, nc = c + dc;
-        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) { count++; nr += dr; nc += dc; }
+        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) {
+            count++; nr += dr; nc += dc;
+        }
+        const frontOpen = nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && !omokState.board[nr][nc];
         nr = r - dr; nc = c - dc;
-        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) { count++; nr -= dr; nc -= dc; }
+        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) {
+            count++; nr -= dr; nc -= dc;
+        }
+        const backOpen = nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && !omokState.board[nr][nc];
+        if (count >= targetCount && frontOpen && backOpen) return true;
+    }
+    return false;
+}
+
+function getMaxCount(r, c, color) {
+    let max = 0;
+    for (const [dr, dc] of DIRS) {
+        let count = 1;
+        let nr = r + dr, nc = c + dc;
+        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) {
+            count++; nr += dr; nc += dc;
+        }
+        nr = r - dr; nc = c - dc;
+        while (nr >= 0 && nr < OMOK_SIZE && nc >= 0 && nc < OMOK_SIZE && omokState.board[nr][nc] === color) {
+            count++; nr -= dr; nc -= dc;
+        }
         if (count > max) max = count;
     }
     return max;
@@ -114,18 +286,18 @@ function getMaxCount(r, c, color) {
 
 function evaluatePosition(r, c, color) {
     let score = 0;
-    const directions = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    const opp = color === 'w' ? 'b' : 'w';
 
-    for (const [dr, dc] of directions) {
+    for (const [dr, dc] of DIRS) {
         let count = 0;
-        let open = 0;
+        let openEnds = 0;
 
         // Forward
         for (let i = 1; i < 5; i++) {
             const nr = r + dr * i, nc = c + dc * i;
             if (nr < 0 || nr >= OMOK_SIZE || nc < 0 || nc >= OMOK_SIZE) break;
             if (omokState.board[nr][nc] === color) count++;
-            else if (omokState.board[nr][nc] === null) { open++; break; }
+            else if (!omokState.board[nr][nc]) { openEnds++; break; }
             else break;
         }
 
@@ -134,16 +306,14 @@ function evaluatePosition(r, c, color) {
             const nr = r - dr * i, nc = c - dc * i;
             if (nr < 0 || nr >= OMOK_SIZE || nc < 0 || nc >= OMOK_SIZE) break;
             if (omokState.board[nr][nc] === color) count++;
-            else if (omokState.board[nr][nc] === null) { open++; break; }
+            else if (!omokState.board[nr][nc]) { openEnds++; break; }
             else break;
         }
 
-        if (count >= 4) score += 10000;
-        else if (count === 3 && open >= 1) score += 1000;
-        else if (count === 2 && open >= 2) score += 100;
-        else if (count === 1) score += 10;
-
-        score += (8 - Math.abs(r - 7) - Math.abs(c - 7));
+        score += patternScore(count + 1, openEnds); // +1 because placing here adds one
     }
+
+    // Center bonus
+    score += (7 - Math.abs(r - 7)) + (7 - Math.abs(c - 7));
     return score;
 }

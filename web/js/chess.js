@@ -249,24 +249,126 @@ function undoSingleMove() {
 }
 
 // ============================================================
-// AI (Easy - for elementary students)
+// AI
 // ============================================================
+
+// Piece-Square Tables (from black's perspective, row 0=black back rank)
+const PST = {
+    p: [
+        [0,  0,  0,  0,  0,  0,  0,  0],
+        [50, 50, 50, 50, 50, 50, 50, 50],
+        [10, 10, 20, 30, 30, 20, 10, 10],
+        [5,  5, 10, 25, 25, 10,  5,  5],
+        [0,  0,  0, 20, 20,  0,  0,  0],
+        [5, -5,-10,  0,  0,-10, -5,  5],
+        [5, 10, 10,-20,-20, 10, 10,  5],
+        [0,  0,  0,  0,  0,  0,  0,  0]
+    ],
+    n: [
+        [-50,-40,-30,-30,-30,-30,-40,-50],
+        [-40,-20,  0,  0,  0,  0,-20,-40],
+        [-30,  0, 10, 15, 15, 10,  0,-30],
+        [-30,  5, 15, 20, 20, 15,  5,-30],
+        [-30,  0, 15, 20, 20, 15,  0,-30],
+        [-30,  5, 10, 15, 15, 10,  5,-30],
+        [-40,-20,  0,  5,  5,  0,-20,-40],
+        [-50,-40,-30,-30,-30,-30,-40,-50]
+    ],
+    b: [
+        [-20,-10,-10,-10,-10,-10,-10,-20],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0, 10, 10, 10, 10,  0,-10],
+        [-10,  5,  5, 10, 10,  5,  5,-10],
+        [-10,  0, 10, 10, 10, 10,  0,-10],
+        [-10, 10, 10, 10, 10, 10, 10,-10],
+        [-10,  5,  0,  0,  0,  0,  5,-10],
+        [-20,-10,-10,-10,-10,-10,-10,-20]
+    ],
+    r: [
+        [0,  0,  0,  0,  0,  0,  0,  0],
+        [5, 10, 10, 10, 10, 10, 10,  5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [-5,  0,  0,  0,  0,  0,  0, -5],
+        [0,  0,  0,  5,  5,  0,  0,  0]
+    ],
+    q: [
+        [-20,-10,-10, -5, -5,-10,-10,-20],
+        [-10,  0,  0,  0,  0,  0,  0,-10],
+        [-10,  0,  5,  5,  5,  5,  0,-10],
+        [-5,  0,  5,  5,  5,  5,  0, -5],
+        [0,  0,  5,  5,  5,  5,  0, -5],
+        [-10,  5,  5,  5,  5,  5,  0,-10],
+        [-10,  0,  5,  0,  0,  0,  0,-10],
+        [-20,-10,-10, -5, -5,-10,-10,-20]
+    ],
+    k: [
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-30,-40,-40,-50,-50,-40,-40,-30],
+        [-20,-30,-30,-40,-40,-30,-30,-20],
+        [-10,-20,-20,-20,-20,-20,-20,-10],
+        [20, 20,  0,  0,  0,  0, 20, 20],
+        [20, 30, 10,  0,  0, 10, 30, 20]
+    ]
+};
+
 function evaluateBoard(board) {
     let score = 0;
     for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
             const piece = board[r][c];
             if (!piece) continue;
-            const val = PIECE_VALUES[piece.toLowerCase()];
-            const centerBonus = (3.5 - Math.abs(c - 3.5)) * 5 + (3.5 - Math.abs(r - 3.5)) * 3;
+            const type = piece.toLowerCase();
+            const val = PIECE_VALUES[type];
+            const pst = PST[type];
             if (isBlackPiece(piece)) {
-                score += val + centerBonus;
+                score += val + pst[r][c];
             } else {
-                score -= val + centerBonus;
+                // Mirror row for white (row 7 = white back rank)
+                score -= val + pst[7 - r][c];
             }
         }
     }
     return score;
+}
+
+// Alpha-beta minimax (black = maximizing)
+function alphaBeta(board, depth, alpha, beta, isMax) {
+    if (depth === 0) return evaluateBoard(board);
+    const side = isMax ? 'b' : 'w';
+    const moves = generateLegalMoves(board, side);
+    if (moves.length === 0) {
+        // Checkmate or stalemate
+        if (isKingInCheck(board, side)) {
+            return isMax ? -99999 + (4 - depth) : 99999 - (4 - depth);
+        }
+        return 0; // Stalemate
+    }
+    if (isMax) {
+        let best = -Infinity;
+        for (const m of moves) {
+            const nb = copyBoard(board);
+            applyMoveToBoard(nb, m);
+            best = Math.max(best, alphaBeta(nb, depth - 1, alpha, beta, false));
+            alpha = Math.max(alpha, best);
+            if (beta <= alpha) break;
+        }
+        return best;
+    } else {
+        let best = Infinity;
+        for (const m of moves) {
+            const nb = copyBoard(board);
+            applyMoveToBoard(nb, m);
+            best = Math.min(best, alphaBeta(nb, depth - 1, alpha, beta, true));
+            beta = Math.min(beta, best);
+            if (beta <= alpha) break;
+        }
+        return best;
+    }
 }
 
 function aiSelectMove() {
@@ -275,99 +377,50 @@ function aiSelectMove() {
 
     const level = chess.aiLevel;
 
-    // Level 1: 거의 랜덤, 가끔 좋은 수
+    // Level 1: 약함 - 1수 평가 + 50% 랜덤
     if (level === 1) {
-        // 60% 완전 랜덤
-        if (Math.random() < 0.6) {
+        if (Math.random() < 0.5) {
             return legalMoves[Math.floor(Math.random() * legalMoves.length)];
         }
-        // 40% 상위 5개 중 랜덤
-        const evaluated = legalMoves.map(move => {
-            const test = copyBoard(chess.board);
-            applyMoveToBoard(test, move);
-            return { move, score: evaluateBoard(test) };
+        const evaluated = legalMoves.map(m => {
+            const nb = copyBoard(chess.board);
+            applyMoveToBoard(nb, m);
+            return { move: m, score: evaluateBoard(nb) };
         });
         evaluated.sort((a, b) => b.score - a.score);
-        const topN = Math.min(5, evaluated.length);
-        return evaluated[Math.floor(Math.random() * topN)].move;
+        return evaluated[Math.floor(Math.random() * Math.min(5, evaluated.length))].move;
     }
 
-    // Level 2: 가끔 랜덤, 보통 괜찮은 수
+    // Level 2: 중간 - 2수 alpha-beta + 15% 랜덤
     if (level === 2) {
-        // 25% 완전 랜덤
-        if (Math.random() < 0.25) {
+        if (Math.random() < 0.15) {
             return legalMoves[Math.floor(Math.random() * legalMoves.length)];
         }
-        // 75% 상위 3개 중 랜덤
-        const evaluated = legalMoves.map(move => {
-            const test = copyBoard(chess.board);
-            applyMoveToBoard(test, move);
-            return { move, score: evaluateBoard(test) };
-        });
-        evaluated.sort((a, b) => b.score - a.score);
-        const topN = Math.min(3, evaluated.length);
-        return evaluated[Math.floor(Math.random() * topN)].move;
+        let bestMove = legalMoves[0], bestScore = -Infinity;
+        for (const m of legalMoves) {
+            const nb = copyBoard(chess.board);
+            applyMoveToBoard(nb, m);
+            const score = alphaBeta(nb, 2, -Infinity, Infinity, false);
+            if (score > bestScore) { bestScore = score; bestMove = m; }
+        }
+        return bestMove;
     }
 
-    // Level 3: 대부분 좋은 수, 2수 앞을 봄
-    // 10% 랜덤
-    if (Math.random() < 0.1) {
-        return legalMoves[Math.floor(Math.random() * legalMoves.length)];
+    // Level 3: 강함 - 4수 alpha-beta, 랜덤 없음
+    let bestMove = legalMoves[0], bestScore = -Infinity;
+    for (const m of legalMoves) {
+        const nb = copyBoard(chess.board);
+        applyMoveToBoard(nb, m);
+        const score = alphaBeta(nb, 3, -Infinity, Infinity, false);
+        if (score > bestScore) { bestScore = score; bestMove = m; }
     }
-    // 90% 2수 앞까지 평가
-    const evaluated = legalMoves.map(move => {
-        const test = copyBoard(chess.board);
-        applyMoveToBoard(test, move);
-        // 상대(흰색) 최선의 응수를 고려
-        const opponentMoves = generateLegalMoves(test, 'w');
-        let worstForBlack = evaluateBoard(test);
-        for (const opp of opponentMoves) {
-            const test2 = copyBoard(test);
-            applyMoveToBoard(test2, opp);
-            const score = evaluateBoard(test2);
-            if (score < worstForBlack) worstForBlack = score;
-        }
-        return { move, score: worstForBlack };
-    });
-    evaluated.sort((a, b) => b.score - a.score);
-    // 상위 2개 중 랜덤 (약간의 변화)
-    const topN = Math.min(2, evaluated.length);
-    return evaluated[Math.floor(Math.random() * topN)].move;
+    return bestMove;
 }
 
 // ============================================================
 // Board Rendering
 // ============================================================
-function ensureSVGDefs() {
-    if (document.getElementById('chess-svg-defs')) return;
-    const svgNS = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(svgNS, 'svg');
-    svg.id = 'chess-svg-defs';
-    svg.setAttribute('width', '0');
-    svg.setAttribute('height', '0');
-    svg.style.position = 'absolute';
-    svg.innerHTML = `<defs>
-        <linearGradient id="gradWhite" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#fff;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:1" />
-        </linearGradient>
-        <linearGradient id="gradGold" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#daa520;stop-opacity:1" />
-        </linearGradient>
-        <linearGradient id="gradBlack" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
-            <stop offset="100%" style="stop-color:#222;stop-opacity:1" />
-        </linearGradient>
-        <filter id="shadow">
-            <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.5)"/>
-        </filter>
-    </defs>`;
-    document.body.appendChild(svg);
-}
-
 function renderChessBoard() {
-    ensureSVGDefs();
     const boardEl = document.getElementById('chess-board');
     boardEl.innerHTML = '';
 
