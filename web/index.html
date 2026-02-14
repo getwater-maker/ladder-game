@@ -323,18 +323,21 @@
 
         <!-- Anniversary Modal -->
         <div id="anniversary-modal" class="modal hidden">
-            <div class="modal-content" style="max-width:420px">
+            <div class="modal-content anniversary-content">
                 <button class="modal-close-btn" onclick="closeAnniversaryModal()">✕</button>
                 <h2>📅 기념일 관리</h2>
+                <p class="ann-desc">매년 반복되는 기념일을 등록하세요</p>
 
                 <div id="anniversary-list" class="anniversary-list">
                     <!-- Injected -->
                 </div>
 
                 <div class="add-anniversary-form">
-                    <input type="text" id="new-ann-date" placeholder="날짜 (MM-DD)" maxlength="5" style="flex:1">
-                    <input type="text" id="new-ann-name" placeholder="기념일 이름" style="flex:2">
-                    <button class="btn-small" onclick="addAnniversary()">추가</button>
+                    <div class="ann-input-row">
+                        <input type="text" id="new-ann-date" placeholder="MM-DD" maxlength="5" class="ann-date-input">
+                        <input type="text" id="new-ann-name" placeholder="기념일 이름 (예: 한봄 생일)" class="ann-name-input">
+                    </div>
+                    <button class="btn-primary ann-add-btn" onclick="addAnniversary()">추가</button>
                 </div>
             </div>
         </div>
