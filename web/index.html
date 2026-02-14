@@ -89,22 +89,27 @@
         <!-- Omok Level Selection Screen -->
         <div id="omok-level-screen" class="screen hidden">
             <h2>🤖 난이도 선택</h2>
-            <p>자신에게 맞는 레벨을 선택하세요!</p>
+            <p>색상을 선택하세요</p>
+            <div class="color-select-row" style="margin-bottom:15px">
+                <button class="color-btn selected" id="omok-ai-color-b" onclick="selectOmokAiColor('b')">⚫ 흑돌 (선공)</button>
+                <button class="color-btn" id="omok-ai-color-w" onclick="selectOmokAiColor('w')">⚪ 백돌</button>
+            </div>
+            <p>난이도를 선택하세요!</p>
             <div class="level-grid">
-                <button class="level-btn l-easy" onclick="initOmokGame('ai', 1); showOmokBoard();">1</button>
-                <button class="level-btn l-easy" onclick="initOmokGame('ai', 2); showOmokBoard();">2</button>
-                <button class="level-btn l-easy" onclick="initOmokGame('ai', 3); showOmokBoard();">3</button>
-                <button class="level-btn l-easy" onclick="initOmokGame('ai', 4); showOmokBoard();">4</button>
+                <button class="level-btn l-easy" onclick="startOmokAi(1)">1</button>
+                <button class="level-btn l-easy" onclick="startOmokAi(2)">2</button>
+                <button class="level-btn l-easy" onclick="startOmokAi(3)">3</button>
+                <button class="level-btn l-easy" onclick="startOmokAi(4)">4</button>
 
-                <button class="level-btn l-mid" onclick="initOmokGame('ai', 5); showOmokBoard();">5</button>
-                <button class="level-btn l-mid" onclick="initOmokGame('ai', 6); showOmokBoard();">6</button>
-                <button class="level-btn l-mid" onclick="initOmokGame('ai', 7); showOmokBoard();">7</button>
-                <button class="level-btn l-mid" onclick="initOmokGame('ai', 8); showOmokBoard();">8</button>
+                <button class="level-btn l-mid" onclick="startOmokAi(5)">5</button>
+                <button class="level-btn l-mid" onclick="startOmokAi(6)">6</button>
+                <button class="level-btn l-mid" onclick="startOmokAi(7)">7</button>
+                <button class="level-btn l-mid" onclick="startOmokAi(8)">8</button>
 
-                <button class="level-btn l-hard" onclick="initOmokGame('ai', 9); showOmokBoard();">9</button>
-                <button class="level-btn l-hard" onclick="initOmokGame('ai', 10); showOmokBoard();">10</button>
-                <button class="level-btn l-hard" onclick="initOmokGame('ai', 11); showOmokBoard();">11</button>
-                <button class="level-btn l-hard" onclick="initOmokGame('ai', 12); showOmokBoard();">12 (🔥)</button>
+                <button class="level-btn l-hard" onclick="startOmokAi(9)">9</button>
+                <button class="level-btn l-hard" onclick="startOmokAi(10)">10</button>
+                <button class="level-btn l-hard" onclick="startOmokAi(11)">11</button>
+                <button class="level-btn l-hard" onclick="startOmokAi(12)">12 (🔥)</button>
             </div>
             <button class="btn-small" onclick="backToOmokMode()" style="margin-top:20px">← 뒤로가기</button>
         </div>

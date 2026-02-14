@@ -7,6 +7,8 @@ export function getAiMove() {
     if (omokState.gameOver) return null;
 
     const level = omokState.level || 1;
+    const ai = omokState.turn; // AI's color = current turn
+    const human = ai === 'b' ? 'w' : 'b';
 
     // Level 1-2: 30% random
     if (level <= 2 && Math.random() < 0.3) {
@@ -14,24 +16,24 @@ export function getAiMove() {
     }
 
     // Always check forced wins/blocks first
-    const winMove = findForcedMove('w', 4);
+    const winMove = findForcedMove(ai, 4);
     if (winMove) return winMove;
 
-    const blockMove = findForcedMove('b', 4);
+    const blockMove = findForcedMove(human, 4);
     if (blockMove) return blockMove;
 
     // Level 3+: check open-3 attacks and blocks
     if (level >= 3) {
-        const my3 = findForcedMove('w', 3, true);
+        const my3 = findForcedMove(ai, 3, true);
         if (my3) return my3;
-        const block3 = findForcedMove('b', 3, true);
+        const block3 = findForcedMove(human, 3, true);
         if (block3) return block3;
     }
 
     // Level 9+: minimax search for strongest play
     if (level >= 9) {
         const depth = level >= 11 ? 4 : (level >= 9 ? 2 : 1);
-        return minimaxRoot(depth);
+        return minimaxRoot(depth, ai, human);
     }
 
     // Level 1-8: heuristic with randomness
@@ -40,7 +42,7 @@ export function getAiMove() {
 
     const scored = candidates.map(({ r, c }) => ({
         r, c,
-        score: evaluatePosition(r, c, 'w') + evaluatePosition(r, c, 'b') * 0.95
+        score: evaluatePosition(r, c, ai) + evaluatePosition(r, c, human) * 0.95
     }));
     scored.sort((a, b) => b.score - a.score);
 
@@ -81,24 +83,26 @@ function getCandidateMoves() {
 }
 
 // Minimax with alpha-beta for high levels
-function minimaxRoot(depth) {
+let _ai = 'w', _human = 'b'; // module-level for minimax access
+
+function minimaxRoot(depth, ai, human) {
+    _ai = ai; _human = human;
     const candidates = getCandidateMoves();
     if (candidates.length === 0) return findRandomMove();
 
-    // Pre-score and limit candidates for performance
     const scored = candidates.map(({ r, c }) => ({
         r, c,
-        score: evaluatePosition(r, c, 'w') + evaluatePosition(r, c, 'b') * 0.9
+        score: evaluatePosition(r, c, ai) + evaluatePosition(r, c, human) * 0.9
     }));
     scored.sort((a, b) => b.score - a.score);
-    const topMoves = scored.slice(0, 15); // Only search top 15
+    const topMoves = scored.slice(0, 15);
 
     let bestMove = topMoves[0];
     let bestScore = -Infinity;
 
     for (const m of topMoves) {
-        omokState.board[m.r][m.c] = 'w';
-        if (checkWin(m.r, m.c, 'w')) {
+        omokState.board[m.r][m.c] = ai;
+        if (checkWin(m.r, m.c, ai)) {
             omokState.board[m.r][m.c] = null;
             return m;
         }
@@ -113,16 +117,16 @@ function minimaxRoot(depth) {
 }
 
 function minimax(depth, alpha, beta, isMax) {
-    if (depth === 0) return evaluateBoard();
+    if (depth === 0) return evaluateBoardForAi();
 
-    const color = isMax ? 'w' : 'b';
+    const color = isMax ? _ai : _human;
+    const opp = isMax ? _human : _ai;
     const candidates = getCandidateMoves();
     if (candidates.length === 0) return 0;
 
-    // Pre-score and limit for performance
     const scored = candidates.map(({ r, c }) => ({
         r, c,
-        score: evaluatePosition(r, c, color) + evaluatePosition(r, c, color === 'w' ? 'b' : 'w') * 0.8
+        score: evaluatePosition(r, c, color) + evaluatePosition(r, c, opp) * 0.8
     }));
     scored.sort((a, b) => b.score - a.score);
     const topMoves = scored.slice(0, 10);
@@ -130,8 +134,8 @@ function minimax(depth, alpha, beta, isMax) {
     if (isMax) {
         let best = -Infinity;
         for (const m of topMoves) {
-            omokState.board[m.r][m.c] = 'w';
-            if (checkWin(m.r, m.c, 'w')) {
+            omokState.board[m.r][m.c] = _ai;
+            if (checkWin(m.r, m.c, _ai)) {
                 omokState.board[m.r][m.c] = null;
                 return 100000;
             }
@@ -144,8 +148,8 @@ function minimax(depth, alpha, beta, isMax) {
     } else {
         let best = Infinity;
         for (const m of topMoves) {
-            omokState.board[m.r][m.c] = 'b';
-            if (checkWin(m.r, m.c, 'b')) {
+            omokState.board[m.r][m.c] = _human;
+            if (checkWin(m.r, m.c, _human)) {
                 omokState.board[m.r][m.c] = null;
                 return -100000;
             }
@@ -158,16 +162,16 @@ function minimax(depth, alpha, beta, isMax) {
     }
 }
 
-// Board evaluation for minimax
-function evaluateBoard() {
+// Board evaluation for minimax (positive = good for AI)
+function evaluateBoardForAi() {
     let score = 0;
     for (let r = 0; r < OMOK_SIZE; r++) {
         for (let c = 0; c < OMOK_SIZE; c++) {
             if (!omokState.board[r][c]) continue;
-            if (omokState.board[r][c] === 'w') {
-                score += evaluateStone(r, c, 'w');
+            if (omokState.board[r][c] === _ai) {
+                score += evaluateStone(r, c, _ai);
             } else {
-                score -= evaluateStone(r, c, 'b');
+                score -= evaluateStone(r, c, _human);
             }
         }
     }

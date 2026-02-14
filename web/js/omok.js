@@ -9,17 +9,27 @@ import { renderBoard, updateStatus } from './omok/ui.js';
 
 let omokRoomId = 'omok_room_default';
 let myOmokColor = 'b'; // Default: black (first player)
+let omokAiColor = 'w'; // AI's color (opposite of player)
 
 // Initialize Game
 export function initOmokGame(mode, level = 1) {
     resetState(mode, level);
     omokState.myColor = myOmokColor;
+    omokAiColor = myOmokColor === 'b' ? 'w' : 'b';
     renderBoard();
     updateStatus();
 
     if (mode === 'pvp') {
         initOmokMultiplayer();
         sendOmokUpdate();
+    }
+
+    // If AI mode and player chose white (AI is black = first), AI moves first
+    if (mode === 'ai' && omokAiColor === 'b') {
+        setTimeout(() => {
+            const aiMove = getAiMove();
+            if (aiMove) makeMove(aiMove.r, aiMove.c);
+        }, 500);
     }
 }
 
@@ -28,8 +38,8 @@ export function handleOmokClick(r, c) {
     if (omokState.gameOver) return;
     if (omokState.board[r][c]) return; // Occupied
 
-    // AI Check
-    if (omokState.mode === 'ai' && omokState.turn !== 'b') return;
+    // AI Check: only allow player's color
+    if (omokState.mode === 'ai' && omokState.turn !== myOmokColor) return;
 
     // PvP: only allow your own color
     if (omokState.mode === 'pvp' && omokState.turn !== myOmokColor) return;
@@ -128,6 +138,17 @@ window.selectOmokColor = function (color) {
     myOmokColor = color;
     document.getElementById('omok-color-b').classList.toggle('selected', color === 'b');
     document.getElementById('omok-color-w').classList.toggle('selected', color === 'w');
+};
+
+window.selectOmokAiColor = function (color) {
+    myOmokColor = color;
+    document.getElementById('omok-ai-color-b').classList.toggle('selected', color === 'b');
+    document.getElementById('omok-ai-color-w').classList.toggle('selected', color === 'w');
+};
+
+window.startOmokAi = function (level) {
+    initOmokGame('ai', level);
+    window.showOmokBoard();
 };
 
 window.joinOmokRoom = function () {
