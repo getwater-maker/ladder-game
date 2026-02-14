@@ -51,7 +51,7 @@ export function getGoals(year, month) {
             const transformed = {};
 
             Object.keys(data).forEach(day => {
-                if (data[day][SHARED_USER]) {
+                if (data[day] && data[day][SHARED_USER]) {
                     transformed[day] = data[day][SHARED_USER];
                 }
             });

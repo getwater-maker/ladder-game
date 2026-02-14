@@ -130,40 +130,27 @@ async function renderScheduler() {
         const dayData = savedData[dd] && savedData[dd][currentChild] ? savedData[dd][currentChild] : {};
 
         taskList.forEach(task => {
-            const max = task.maxQty || 1;
             const currentVal = dayData[task.id];
             let count = 0;
-            if (currentVal === true) count = max;
+            if (currentVal === true) count = 1;
             else if (typeof currentVal === 'number') count = currentVal;
 
-            const isDone = count >= max;
+            const isDone = count > 0;
 
             const taskItem = document.createElement('div');
             taskItem.className = `task-item ${isDone ? 'done' : ''}`;
             taskItem.id = `task-${yyyy}-${mm}-${dd}-${currentChild}-${task.id}`;
 
-            // Force Quantity UI if requested, or if Max > 1
-            if (max > 1) {
-                taskItem.innerHTML = `
-                    <div class="task-row">
-                        <span class="task-name">${task.name}</span>
-                        <div class="task-qty-ctrl">
-                            <button class="btn-micro qty-minus" onclick="updateTaskQty('${yyyy}', '${mm}', '${dd}', '${currentChild}', '${task.id}', ${task.reward}, -1, ${max})">➖</button>
-                            <span class="qty-val">${count}/${max}</span>
-                            <button class="btn-micro qty-plus" onclick="updateTaskQty('${yyyy}', '${mm}', '${dd}', '${currentChild}', '${task.id}', ${task.reward}, 1, ${max})">➕</button>
-                        </div>
+            taskItem.innerHTML = `
+                <div class="task-row">
+                    <span class="task-name">${task.name}</span>
+                    <div class="task-qty-ctrl">
+                        <button class="btn-micro qty-minus" onclick="updateTaskQty('${yyyy}', '${mm}', '${dd}', '${currentChild}', '${task.id}', ${task.reward}, -1)">−</button>
+                        <span class="qty-val">${count}</span>
+                        <button class="btn-micro qty-plus" onclick="updateTaskQty('${yyyy}', '${mm}', '${dd}', '${currentChild}', '${task.id}', ${task.reward}, 1)">+</button>
                     </div>
-                `;
-            } else {
-                // Checkbox
-                taskItem.innerHTML = `
-                    <label class="task-row">
-                        <input type="checkbox" class="task-checkbox" ${count >= 1 ? 'checked' : ''} 
-                        onchange="updateTaskQty('${yyyy}', '${mm}', '${dd}', '${currentChild}', '${task.id}', ${task.reward}, this.checked ? 1 : -1, 1)">
-                        <span class="task-name">${task.name}</span>
-                    </label>
-                `;
-            }
+                </div>
+            `;
             col.appendChild(taskItem);
         });
 
@@ -194,10 +181,9 @@ async function renderScheduler() {
         const savedData = weekGoals[i] || {};
         const dayData = savedData[dd] && savedData[dd][currentChild] ? savedData[dd][currentChild] : {};
         taskList.forEach(task => {
-            const max = task.maxQty || 1;
             const val = dayData[task.id];
             let count = 0;
-            if (val === true) count = max;
+            if (val === true) count = 1;
             else if (typeof val === 'number') count = val;
             weekTotal += count * task.reward;
         });
@@ -215,10 +201,9 @@ async function renderScheduler() {
             Object.keys(monthData).forEach(dd => {
                 const dayData = monthData[dd] && monthData[dd][currentChild] ? monthData[dd][currentChild] : {};
                 taskList.forEach(task => {
-                    const max = task.maxQty || 1;
                     const val = dayData[task.id];
                     let count = 0;
-                    if (val === true) count = max;
+                    if (val === true) count = 1;
                     else if (typeof val === 'number') count = val;
                     monthTotal += count * task.reward;
                 });
@@ -234,57 +219,31 @@ function toDateString(d) {
 }
 
 // Global Handler for Qty Update
-window.updateTaskQty = async function (yyyy, mm, dd, childName, taskId, reward, delta, max) {
+window.updateTaskQty = async function (yyyy, mm, dd, childName, taskId, reward, delta) {
     const elId = `task-${yyyy}-${mm}-${dd}-${childName}-${taskId}`;
     const el = document.getElementById(elId);
     if (!el) return;
 
-    // Get current value from UI for immediate feedback
-    let current = 0;
-    if (max > 1) {
-        const valSpan = el.querySelector('.qty-val');
-        current = parseInt(valSpan.innerText.split('/')[0]);
-    } else {
-        const cb = el.querySelector('.task-checkbox');
-        // If checkbox was clicked, 'cb.checked' is the NEW state.
-        // We need previous state to calculate delta? 
-        // Actually, for checkbox, `onchange` passed explicit 1 or -1 based on NEW state.
-        // So we can assume `current` is irrelevant for delta application, 
-        // BUT we need `next` value to store.
-        // If delta is +1, new is 1. If -1, new is 0. 
-        // Let's trust the delta.
-        // However, we need to know what the DB value was?
-        // Let's assume the UI was in sync.
-        // If checkbox is now checked (passed 1), it means it WAS 0.
-        current = (delta > 0) ? 0 : 1;
-    }
+    const valSpan = el.querySelector('.qty-val');
+    const current = parseInt(valSpan.innerText) || 0;
 
     let next = current + delta;
     if (next < 0) next = 0;
-    if (next > max) next = max;
 
     if (current === next) return;
 
     // Optimistic UI
-    if (max > 1) {
-        el.querySelector('.qty-val').innerText = `${next}/${max}`;
-        if (next >= max) el.classList.add('done');
-        else el.classList.remove('done');
-    } else {
-        if (next >= 1) el.classList.add('done');
-        else el.classList.remove('done');
-    }
+    valSpan.innerText = next;
+    if (next > 0) el.classList.add('done');
+    else el.classList.remove('done');
 
     // Update DB
-    // toggleGoal determines path. We save 'next' (number).
     await toggleGoal(yyyy, mm, dd, childName, taskId, next);
 
     // Update Wallet
-    // Calculate actual change amount
-    // If next > current, we add (diff * reward)
     const diff = next - current;
     if (diff !== 0) {
-        let balance = parseInt(document.getElementById('scheduler-wallet').innerText.replace(/[^0-9]/g, ''));
+        let balance = parseInt(document.getElementById('scheduler-wallet').innerText.replace(/[^0-9]/g, '')) || 0;
         balance += diff * reward;
         document.getElementById('scheduler-wallet').innerText = balance.toLocaleString() + '원';
         await updateWalletBalance(childName, balance);

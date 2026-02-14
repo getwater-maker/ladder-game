@@ -1,4 +1,4 @@
-import { getGoals, toggleGoal, subscribeToGame, updateGameState, getTaskSettings, saveTaskSettings, getWalletBalance, updateWalletBalance, getGoalsRange } from './db.js';
+import { getGoals, toggleGoal, subscribeToGame, updateGameState, getTaskSettings, saveTaskSettings, getWalletBalance, updateWalletBalance } from './db.js';
 import { initOmokGame } from './omok.js';
 
 // ============================================================
@@ -698,33 +698,8 @@ function animatePath(pathPoints, color, onComplete) {
 // ============================================================
 // To-Do List & Wallet
 // ============================================================
-let currentGoalDate = new Date();
-let currentChild = '한봄'; // Default tab
 let currentSettingsChild = '한봄';
-let taskSettings = {}; // { '한봄': [...], '한별': [...], ... }
-
-window.showGoals = function () {
-    updateDateDisplay();
-    loadTasksForChild(currentChild);
-    document.getElementById('scheduler-modal').classList.remove('hidden');
-};
-
-
-window.closeGoals = function () {
-    document.getElementById('scheduler-modal').classList.add('hidden');
-};
-
-window.changeDate = function (delta) {
-    currentGoalDate.setDate(currentGoalDate.getDate() + delta);
-    updateDateDisplay();
-    loadTasksForChild(currentChild);
-};
-
-window.switchChildTab = function (childName) {
-    currentChild = childName;
-    updateTabUI('.goals-content .tab-btn', childName);
-    loadTasksForChild(childName);
-};
+let taskSettings = {};
 
 function updateTabUI(selector, activeName) {
     document.querySelectorAll(selector).forEach(btn => {
@@ -732,103 +707,6 @@ function updateTabUI(selector, activeName) {
         else btn.classList.remove('active');
     });
 }
-
-function updateDateDisplay() {
-    const yyyy = currentGoalDate.getFullYear();
-    const mm = String(currentGoalDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(currentGoalDate.getDate()).padStart(2, '0');
-    document.getElementById('current-date').innerText = `${yyyy}-${mm}-${dd}`;
-}
-
-
-
-async function loadTasksForChild(childName) {
-    const list = document.getElementById('goals-list');
-    const walletDisplay = document.getElementById('current-wallet-amount');
-    list.innerHTML = '<p>Loading...</p>';
-    walletDisplay.innerText = '...';
-
-    const yyyy = currentGoalDate.getFullYear();
-    const mm = String(currentGoalDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(currentGoalDate.getDate()).padStart(2, '0');
-
-    // 1. Get Wallet Balance
-    let balance = await getWalletBalance(childName);
-    walletDisplay.innerText = balance.toLocaleString();
-
-    // 2. Get Task Settings
-    let tasks = await getTaskSettings(childName);
-    if (!tasks) {
-        // Default tasks if none exist
-        tasks = [
-            { id: 'math', name: '수학 공부', reward: 100 },
-            { id: 'english', name: '영어 공부', reward: 100 },
-            { id: 'reading', name: '독서', reward: 100 }
-        ];
-        // Save defaults so we have them next time
-        await saveTaskSettings(childName, tasks);
-    }
-    taskSettings[childName] = tasks;
-
-    // 3. Get Checked Status for Date
-    const savedData = await getGoals(yyyy, mm);
-    // Structure: goals/yyyy/mm/dd/childName/taskId = true/false
-
-    list.innerHTML = '';
-
-    if (tasks.length === 0) {
-        list.innerHTML = '<p>설정에서 할 일을 추가해주세요!</p>';
-        return;
-    }
-
-    tasks.forEach((task) => {
-        let isChecked = false;
-
-        if (savedData && savedData[dd] && savedData[dd][childName] && savedData[dd][childName][task.id]) {
-            isChecked = true;
-        }
-
-        const div = document.createElement('div');
-        div.className = 'goal-item';
-        div.innerHTML = `
-            <div class="goal-left">
-                <input type="checkbox" class="goal-checkbox" 
-                    ${isChecked ? 'checked' : ''} 
-                    onchange="window.handleTaskCheck('${childName}', '${task.id}', ${task.reward}, this.checked)">
-                <span class="goal-label">${task.name}</span>
-            </div>
-            <span class="goal-reward">+${task.reward}원</span>
-        `;
-        list.appendChild(div);
-    });
-}
-
-window.handleTaskCheck = async function (childName, taskId, reward, checked) {
-    const yyyy = currentGoalDate.getFullYear();
-    const mm = String(currentGoalDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(currentGoalDate.getDate()).padStart(2, '0');
-
-    // 1. Optimistic UI update (already handled by checkbox)
-
-    // 2. Update Goal Status in DB
-    await toggleGoal(yyyy, mm, dd, childName, taskId, checked);
-
-    // 3. Update Wallet Logic (Simple version: add/subtract immediately)
-    // NOTE: In a real app, we might want to verify day/transaction to prevent gaming, 
-    // but for family app, immediate update is fine.
-
-    let currentBalance = await getWalletBalance(childName);
-    if (checked) {
-        currentBalance += reward;
-    } else {
-        currentBalance -= reward;
-    }
-
-    await updateWalletBalance(childName, currentBalance);
-
-    // 4. Update UI
-    document.getElementById('current-wallet-amount').innerText = currentBalance.toLocaleString();
-};
 
 // ============================================================
 // Settings Logic
@@ -872,7 +750,7 @@ function renderSettingsList(tasks) {
         div.className = 'setting-item';
         div.innerHTML = `
             <div class="goal-left">
-                <span class="goal-label">${task.name} (최대 ${task.maxQty || 1}회)</span>
+                <span class="goal-label">${task.name}</span>
                 <span class="goal-reward">${task.reward}원</span>
             </div>
             <button class="delete-btn" onclick="deleteTask(${idx})">삭제</button>
@@ -884,11 +762,9 @@ function renderSettingsList(tasks) {
 window.addNewTask = async function () {
     const nameInput = document.getElementById('new-task-name');
     const rewardInput = document.getElementById('new-task-reward');
-    const qtyInput = document.getElementById('new-task-qty'); // New Input
 
     const name = nameInput.value.trim();
     const reward = parseInt(rewardInput.value) || 0;
-    const maxQty = parseInt(qtyInput ? qtyInput.value : 1) || 1;
 
     if (!name) {
         alert("할 일 이름을 입력해주세요.");
@@ -899,8 +775,7 @@ window.addNewTask = async function () {
     const newTask = {
         id: Date.now().toString(),
         name: name,
-        reward: reward,
-        maxQty: maxQty // Default 1 if not set
+        reward: reward
     };
 
     tasks.push(newTask);
@@ -953,76 +828,6 @@ const originalRunFamilyLadder = window.runFamilyLadder || function () { }; // It
 // ============================================================
 // Expose functions to global scope for HTML onclick attributes
 // ============================================================
-// ============================================================
-// Wallet Summary Logic
-// ============================================================
-window.showWalletSummary = async function (period) {
-    const summaryArea = document.getElementById('wallet-summary-area');
-    const summaryTitle = document.getElementById('summary-title');
-    const summaryTotal = document.getElementById('summary-total');
-
-    summaryArea.classList.remove('hidden');
-    summaryTotal.innerText = '계산 중...';
-
-    let total = 0;
-    const now = new Date();
-    let startDate, endDate;
-
-    if (period === 'week') {
-        const day = now.getDay();
-        const diff = now.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
-        startDate = new Date(now.setDate(diff));
-        endDate = new Date(now.setDate(diff + 6));
-        summaryTitle.innerText = `이번 주 (${startDate.getMonth() + 1}/${startDate.getDate()} ~ ${endDate.getMonth() + 1}/${endDate.getDate()}) 완료 금액`;
-    } else {
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        summaryTitle.innerText = `이번 달 (${now.getMonth() + 1}월) 완료 금액`;
-    }
-
-    // Logic to calculate total
-    // 1. Get tasks to know rewards
-    const tasks = taskSettings[currentChild] || [];
-    const taskMap = {};
-    tasks.forEach(t => taskMap[t.id] = t.reward);
-
-    // 2. Fetch data (simplified: fetched current month)
-    // For a robust app, we'd handle cross-month queries. 
-    // Here we assume checking current month context.
-
-    const yyyy = startDate.getFullYear();
-    const mm = String(startDate.getMonth() + 1).padStart(2, '0');
-
-    const monthData = await getGoalsRange(startDate, endDate);
-    // monthData: { '01': { 'family_shared': { 'childName': { 'taskId': true } } }, '02': ... }
-
-    if (monthData) {
-        Object.keys(monthData).forEach(day => {
-            const dayNum = parseInt(day);
-            // Check if day is within range (mostly for week view)
-            // But since we fetched by month, just summing up is okay for now if within month.
-            // Let's rely on simple month data for now.
-
-            const dayData = monthData[day];
-            if (dayData && dayData['family_shared'] && dayData['family_shared'][currentChild]) {
-                const completedTasks = dayData['family_shared'][currentChild];
-                Object.keys(completedTasks).forEach(taskId => {
-                    if (completedTasks[taskId] === true && taskMap[taskId]) {
-                        total += parseInt(taskMap[taskId]);
-                    }
-                });
-            }
-        });
-    }
-
-    summaryTotal.innerText = `총 ${total.toLocaleString()}원`;
-};
-
-window.hideWalletSummary = function () {
-    document.getElementById('wallet-summary-area').classList.add('hidden');
-};
-
-
 // ============================================================
 // Omok Game Logic Integration
 // ============================================================
@@ -1114,17 +919,11 @@ window.prevFamilyRound = prevFamilyRound;
 window.skipToNextRound = skipToNextRound;
 window.showFamilyReport = showFamilyReport;
 window.closeModal = closeModal;
-window.switchChildTab = switchChildTab;
-window.handleTaskCheck = handleTaskCheck;
 window.openSettings = openSettings;
 window.closeSettings = closeSettings;
 window.switchSettingsTab = switchSettingsTab;
 window.addNewTask = addNewTask;
 window.deleteTask = deleteTask;
-window.showWalletSummary = showWalletSummary;
-window.showWalletSummary = showWalletSummary;
-window.hideWalletSummary = hideWalletSummary;
-window.closeModal = closeModal;
 
 
 // ============================================================

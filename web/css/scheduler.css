@@ -141,62 +141,65 @@
 /* Tasks */
 .task-item {
     background: #f1f3f5;
-    margin-bottom: 5px;
-    padding: 5px;
+    margin-bottom: 4px;
+    padding: 4px 5px;
     border-radius: 5px;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    font-size: 0.8rem;
 }
 
 .task-item.done {
     background: #e6fcf5;
+}
+
+.task-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+}
+
+.task-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.task-item.done .task-name {
     text-decoration: line-through;
     color: #888;
 }
 
-.task-checkbox {
-    cursor: pointer;
-}
-
-/* Family Edit Modal */
-.family-edit-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-    z-index: 200;
-    width: 400px;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.round-edit-item {
-    border: 1px solid #eee;
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 10px;
+.task-qty-ctrl {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
 }
 
-.add-round-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-.add-round-form input {
-    padding: 8px;
+.btn-micro {
+    width: 20px;
+    height: 20px;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #666;
 }
+
+.btn-micro:hover {
+    background: #eee;
+}
+
+.qty-val {
+    min-width: 16px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
