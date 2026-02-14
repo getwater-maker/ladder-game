@@ -135,11 +135,11 @@
 }
 
 .holiday-label {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     color: #e03131;
     text-align: center;
-    min-height: 1.1em;
-    line-height: 1.1em;
+    min-height: 1.2em;
+    line-height: 1.2em;
     margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
