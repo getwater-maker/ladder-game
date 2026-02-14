@@ -1,4 +1,4 @@
-import { getGoals, toggleGoal, getTaskSettings, getWalletBalance, updateWalletBalance, FIXED_HOLIDAYS, getAnniversaries } from './db.js';
+import { getGoals, toggleGoal, getTaskSettings, getWalletBalance, updateWalletBalance, FIXED_HOLIDAYS, getAnniversaries, saveAnniversaries } from './db.js';
 
 let currentSchedulerDate = new Date(); // Tracks the week
 let taskSettings = {};
@@ -268,6 +268,83 @@ window.goToday = function () {
 window.showSettlement = function (type) {
     const el = document.getElementById(type === 'week' ? 'week-settlement' : 'month-settlement');
     if (el) alert(`${type === 'week' ? '주간' : '월간'} 정산: ${el.innerText}`);
+};
+
+// ============================================================
+// Anniversary Management
+// ============================================================
+let cachedAnniversaries = [];
+
+window.openAnniversaryModal = async function () {
+    document.getElementById('anniversary-modal').classList.remove('hidden');
+    cachedAnniversaries = (await getAnniversaries()) || [];
+    if (!Array.isArray(cachedAnniversaries)) cachedAnniversaries = [];
+    renderAnniversaryList();
+};
+
+window.closeAnniversaryModal = function () {
+    document.getElementById('anniversary-modal').classList.add('hidden');
+    renderScheduler();
+};
+
+function renderAnniversaryList() {
+    const listEl = document.getElementById('anniversary-list');
+    if (!listEl) return;
+
+    if (cachedAnniversaries.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:#999">등록된 기념일이 없습니다</p>';
+        return;
+    }
+
+    listEl.innerHTML = '';
+    cachedAnniversaries.forEach((ann, idx) => {
+        const item = document.createElement('div');
+        item.className = 'anniversary-item';
+        item.innerHTML = `
+            <span class="ann-date">${ann.date}</span>
+            <span class="ann-name">${ann.name}</span>
+            <button class="delete-btn" onclick="deleteAnniversary(${idx})">삭제</button>
+        `;
+        listEl.appendChild(item);
+    });
+}
+
+window.addAnniversary = async function () {
+    const dateInput = document.getElementById('new-ann-date');
+    const nameInput = document.getElementById('new-ann-name');
+
+    const date = dateInput.value.trim();
+    const name = nameInput.value.trim();
+
+    if (!date || !name) {
+        alert('날짜와 이름을 모두 입력해주세요.');
+        return;
+    }
+
+    if (!/^\d{2}-\d{2}$/.test(date)) {
+        alert('날짜 형식은 MM-DD 입니다. (예: 03-15)');
+        return;
+    }
+
+    const [mm, dd] = date.split('-').map(Number);
+    if (mm < 1 || mm > 12 || dd < 1 || dd > 31) {
+        alert('올바른 날짜를 입력해주세요.');
+        return;
+    }
+
+    cachedAnniversaries.push({ date, name });
+    await saveAnniversaries(cachedAnniversaries);
+    renderAnniversaryList();
+
+    dateInput.value = '';
+    nameInput.value = '';
+};
+
+window.deleteAnniversary = async function (index) {
+    if (!confirm(`"${cachedAnniversaries[index].name}" 기념일을 삭제하시겠습니까?`)) return;
+    cachedAnniversaries.splice(index, 1);
+    await saveAnniversaries(cachedAnniversaries);
+    renderAnniversaryList();
 };
 
 // Assign globals

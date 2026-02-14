@@ -510,6 +510,27 @@ canvas {
     position: relative;
 }
 
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #999;
+    z-index: 10;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
 @keyframes popIn {
     from {
         transform: scale(0.5);

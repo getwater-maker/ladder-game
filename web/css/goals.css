@@ -190,6 +190,50 @@
     cursor: pointer;
 }
 
+/* Anniversary Modal */
+.anniversary-list {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.anniversary-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f9f9f9;
+    padding: 10px 14px;
+    border-radius: 10px;
+}
+
+.anniversary-item .ann-date {
+    font-weight: bold;
+    color: var(--primary-color);
+    min-width: 60px;
+}
+
+.anniversary-item .ann-name {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.add-anniversary-form {
+    display: flex;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.add-anniversary-form input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
 /* Omok Game */
 .omok-board-container {
     display: flex;
@@ -391,6 +435,7 @@
     max-width: 500px;
     max-height: 80vh;
     overflow-y: auto;
+    position: relative;
 }
 
 .round-edit-item {

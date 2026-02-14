@@ -259,6 +259,7 @@
         <!-- Result Modal -->
         <div id="result-modal" class="modal hidden">
             <div class="modal-content">
+                <button class="modal-close-btn" onclick="document.getElementById('result-modal').classList.add('hidden')">✕</button>
                 <h2 id="modal-player-name">결과!</h2>
                 <div id="modal-result-icon" class="result-icon">🎁</div>
                 <h1 id="modal-result-text">결과 내용</h1>
@@ -279,6 +280,7 @@
                             <button class="btn-today" onclick="goToday()">오늘</button>
                         </div>
                         <div class="scheduler-header-buttons">
+                            <button class="btn-icon" onclick="openAnniversaryModal()">📅</button>
                             <button class="btn-icon" onclick="openSettings()">⚙️</button>
                             <button class="btn-icon" onclick="closeScheduler()">✖</button>
                         </div>
@@ -311,6 +313,7 @@
         <!-- Family Edit Modal -->
         <div id="family-edit-modal" class="modal hidden">
             <div class="family-edit-modal">
+                <button class="modal-close-btn" onclick="document.getElementById('family-edit-modal').classList.add('hidden')">✕</button>
                 <h2>게임 항목 설정</h2>
                 <div id="family-round-list"></div>
                 <button class="btn-primary" onclick="saveFamilyEdit()" style="margin-top:20px; width:100%">저장</button>
@@ -318,9 +321,28 @@
         </div>
 
 
+        <!-- Anniversary Modal -->
+        <div id="anniversary-modal" class="modal hidden">
+            <div class="modal-content" style="max-width:420px">
+                <button class="modal-close-btn" onclick="closeAnniversaryModal()">✕</button>
+                <h2>📅 기념일 관리</h2>
+
+                <div id="anniversary-list" class="anniversary-list">
+                    <!-- Injected -->
+                </div>
+
+                <div class="add-anniversary-form">
+                    <input type="text" id="new-ann-date" placeholder="날짜 (MM-DD)" maxlength="5" style="flex:1">
+                    <input type="text" id="new-ann-name" placeholder="기념일 이름" style="flex:2">
+                    <button class="btn-small" onclick="addAnniversary()">추가</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Settings Modal -->
         <div id="settings-modal" class="modal hidden">
             <div class="modal-content settings-content">
+                <button class="modal-close-btn" onclick="closeSettings()">✕</button>
                 <h2>⚙️ 할 일 및 용돈 설정</h2>
 
                 <div class="child-tabs">
