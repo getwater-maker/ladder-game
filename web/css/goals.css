@@ -364,18 +364,11 @@
     }
 }
 
-/* Modal Victory Style */
-.victory-modal-content {
-    background: linear-gradient(135deg, #fff, #f3e5f5);
-    border: 4px solid gold;
-}
-
-.victory-text {
-    font-size: 3rem;
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 20px 0;
+/* Shared Game Result Modal */
+.game-result-text {
+    font-size: 1.4rem;
+    color: #555;
+    margin: 10px 0 0;
 }
 
 /* Game Header */

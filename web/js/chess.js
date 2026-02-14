@@ -752,23 +752,30 @@ function showCheckAlert() {
 }
 
 function showChessGameOver(title, subtitle) {
-    const chessGameArea = document.getElementById('chess-game-area');
-    const existing = document.getElementById('chess-game-over');
-    if (existing) existing.remove();
+    const modal = document.getElementById('result-modal');
+    if (!modal) return;
 
-    const overlay = document.createElement('div');
-    overlay.className = 'chess-game-over';
-    overlay.id = 'chess-game-over';
-    overlay.innerHTML = `
-        <div class="chess-game-over-content">
-            <h2>${title}</h2>
-            <p>${subtitle}</p>
-            <button class="btn-primary" onclick="chessNewGame()">다시 하기</button>
-            <br><br>
-            <button class="btn-small" onclick="backToStartFromChess()">처음으로</button>
-        </div>
+    const titleEl = document.getElementById('modal-player-name');
+    const icon = document.getElementById('modal-result-icon');
+    const text = document.getElementById('modal-result-text');
+    const btnArea = document.getElementById('modal-btn-area');
+
+    // Determine icon based on result
+    let iconText = '🤝';
+    if (title.includes('승리')) iconText = '🏆';
+    else if (title.includes('패배')) iconText = '😢';
+
+    titleEl.innerText = title;
+    icon.innerText = iconText;
+    text.innerText = subtitle;
+    text.className = 'game-result-text';
+
+    btnArea.innerHTML = `
+        <button class="btn-primary" onclick="chessNewGame(); document.getElementById('result-modal').classList.add('hidden')">다시 하기</button>
+        <button class="btn-secondary" onclick="backToStartFromChess(); document.getElementById('result-modal').classList.add('hidden')">나가기</button>
     `;
-    chessGameArea.appendChild(overlay);
+
+    modal.classList.remove('hidden');
 }
 
 // ============================================================
@@ -806,8 +813,8 @@ function initChessGame(mode, level) {
     chess.gameOver = false;
     chess.isThinking = false;
 
-    const overlay = document.getElementById('chess-game-over');
-    if (overlay) overlay.remove();
+    const resultModal = document.getElementById('result-modal');
+    if (resultModal) resultModal.classList.add('hidden');
 
     // Reset level step for next time
     document.getElementById('chess-mode-step').classList.remove('hidden');

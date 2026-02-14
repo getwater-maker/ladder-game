@@ -337,6 +337,7 @@ function showGeneralResult(playerIdx, itemColIdx) {
         document.getElementById('modal-player-name').innerText = `${playerName}의 결과!`;
         document.getElementById('modal-result-icon').innerText = '🎉';
         document.getElementById('modal-result-text').innerText = item.display;
+        document.getElementById('modal-result-text').className = '';
         document.getElementById('modal-details').innerHTML = '';
         document.getElementById('modal-details').classList.add('hidden');
 
@@ -479,6 +480,7 @@ function showFamilyResult(resultColIdx) {
         document.getElementById('modal-player-name').innerText = `${gameState.avatar} ${gameState.player}의 결과!`;
         document.getElementById('modal-result-icon').innerText = gameState.categoryIcon;
         document.getElementById('modal-result-text').innerText = `${gameState.categoryName} ${result.display}`;
+        document.getElementById('modal-result-text').className = '';
 
         const mDetails = document.getElementById('modal-details');
         mDetails.innerHTML = '';
@@ -527,6 +529,7 @@ function showFamilyReport() {
     document.getElementById('modal-player-name').innerText = '게임 리포트';
     document.getElementById('modal-result-icon').innerText = '📊';
     document.getElementById('modal-result-text').innerText = '오늘의 결과';
+    document.getElementById('modal-result-text').className = '';
 
     const mDetails = document.getElementById('modal-details');
     mDetails.classList.remove('hidden');

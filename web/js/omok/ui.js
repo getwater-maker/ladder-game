@@ -65,17 +65,30 @@ function showVictoryModal() {
     const modal = document.getElementById('result-modal');
     if (!modal) return;
 
-    const title = document.getElementById('modal-player-name');
+    const titleEl = document.getElementById('modal-player-name');
     const icon = document.getElementById('modal-result-icon');
     const text = document.getElementById('modal-result-text');
     const btnArea = document.getElementById('modal-btn-area');
 
-    title.innerText = "🏆 게임 종료 🏆";
-    icon.innerText = omokState.winner === 'b' ? '⚫' : '⚪';
-    text.innerText = omokState.winner === 'b' ? '흑돌 승리!' : '백돌 승리!';
-    text.className = 'victory-text';
+    // Determine result from perspective
+    let title, iconText, subtitle;
+    if (omokState.mode === 'pvp') {
+        const iWin = omokState.winner === omokState.myColor;
+        title = iWin ? '🏆 승리!' : '😢 패배';
+        iconText = iWin ? '🏆' : '😢';
+        subtitle = iWin ? '정말 잘했어요!' : '다시 도전해 보세요!';
+    } else {
+        const winnerName = omokState.winner === 'b' ? '흑돌' : '백돌';
+        title = `🏆 ${winnerName} 승리!`;
+        iconText = omokState.winner === 'b' ? '⚫' : '⚪';
+        subtitle = '멋진 게임이었어요!';
+    }
 
-    // We access global aliases for restart/exit which are mapped in main.js or omok.js checks
+    titleEl.innerText = title;
+    icon.innerText = iconText;
+    text.innerText = subtitle;
+    text.className = 'game-result-text';
+
     btnArea.innerHTML = `
         <button class="btn-primary" onclick="restartOmok(); document.getElementById('result-modal').classList.add('hidden')">다시 하기</button>
         <button class="btn-secondary" onclick="backToStartFromOmok(); document.getElementById('result-modal').classList.add('hidden')">나가기</button>
