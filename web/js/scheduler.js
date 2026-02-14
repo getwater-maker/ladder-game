@@ -262,3 +262,4 @@ window.switchSchedulerTab = function (childName) {
 window.openScheduler = openScheduler;
 window.closeScheduler = closeScheduler;
 window.changeSchedulerDate = changeSchedulerDate;
+window.refreshScheduler = renderScheduler;

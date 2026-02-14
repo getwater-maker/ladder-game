@@ -171,7 +171,13 @@ function showSetupScreen() {
 }
 
 function backToStart() {
-    switchScreen(setupScreen, startScreen);
+    // Hide all screens, then show start screen
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.classList.add('hidden');
+    });
+    startScreen.classList.remove('hidden');
+    startScreen.classList.add('active');
 }
 
 function startChessGame() {
@@ -778,7 +784,7 @@ window.closeSettings = function () {
     document.getElementById('settings-modal').classList.add('hidden');
     document.getElementById('scheduler-modal').classList.remove('hidden');
     // Refresh the scheduler to show changes
-    loadTasksForChild(currentChild);
+    if (window.refreshScheduler) window.refreshScheduler();
 };
 
 window.switchSettingsTab = async function (childName) {
@@ -966,6 +972,9 @@ window.hideWalletSummary = function () {
 window.showOmokScreen = function () {
     document.getElementById('start-screen').classList.remove('active');
     document.getElementById('start-screen').classList.add('hidden');
+    // Reset PvP room UI
+    const pvpRoom = document.getElementById('omok-pvp-room');
+    if (pvpRoom) pvpRoom.classList.add('hidden');
     document.getElementById('omok-screen').classList.remove('hidden');
     document.getElementById('omok-screen').classList.add('active');
 };

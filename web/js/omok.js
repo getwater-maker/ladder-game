@@ -112,9 +112,23 @@ function sendOmokUpdate() {
 }
 
 // Exports for Main UI
-// Exports for Main UI
 window.startOmokGame = (mode, level) => initOmokGame(mode, level);
-window.startOmokPvp = () => initOmokGame('pvp');
+
+window.showOmokPvpRoom = function () {
+    document.getElementById('omok-pvp-room').classList.remove('hidden');
+};
+
+window.joinOmokRoom = function () {
+    const code = document.getElementById('omok-room-code').value.trim();
+    if (!code) {
+        alert('방 코드를 입력하세요!');
+        return;
+    }
+    omokRoomId = 'omok_room_' + code;
+    document.getElementById('omok-pvp-room').classList.add('hidden');
+    initOmokGame('pvp');
+    window.showOmokBoard();
+};
 
 export function restartOmok() {
     if (omokState.mode === 'pvp') {

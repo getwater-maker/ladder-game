@@ -892,13 +892,33 @@ window.showAiLevelSelect = function () {
     document.getElementById('chess-level-step').classList.remove('hidden');
 };
 
+window.showChessPvpRoom = function () {
+    document.getElementById('chess-mode-step').classList.add('hidden');
+    document.getElementById('chess-pvp-step').classList.remove('hidden');
+};
+
+window.joinChessRoom = function () {
+    const code = document.getElementById('chess-room-code').value.trim();
+    if (!code) {
+        alert('방 코드를 입력하세요!');
+        return;
+    }
+    chessRoomId = 'chess_room_' + code;
+    document.getElementById('chess-pvp-step').classList.add('hidden');
+    window.initChessGame('pvp');
+};
+
 window.backFromChessStep = function () {
     const levelStep = document.getElementById('chess-level-step');
+    const pvpStep = document.getElementById('chess-pvp-step');
     const modeStep = document.getElementById('chess-mode-step');
 
-    // If showing level select, go back to mode select
+    // If showing level select or pvp room, go back to mode select
     if (!levelStep.classList.contains('hidden')) {
         levelStep.classList.add('hidden');
+        modeStep.classList.remove('hidden');
+    } else if (!pvpStep.classList.contains('hidden')) {
+        pvpStep.classList.add('hidden');
         modeStep.classList.remove('hidden');
     } else {
         backToStartFromChess();
@@ -906,7 +926,11 @@ window.backFromChessStep = function () {
 };
 
 function backToStartFromChess() {
-    document.getElementById('chess-mode-select').classList.remove('hidden'); // Reset to mode select
+    // Reset all chess sub-steps
+    document.getElementById('chess-mode-select').classList.remove('hidden');
+    document.getElementById('chess-mode-step').classList.remove('hidden');
+    document.getElementById('chess-level-step').classList.add('hidden');
+    document.getElementById('chess-pvp-step').classList.add('hidden');
     document.getElementById('chess-game-area').classList.add('hidden');
     document.getElementById('chess-screen').classList.add('hidden');
     document.getElementById('chess-screen').classList.remove('active');
