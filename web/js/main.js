@@ -41,7 +41,18 @@ window.openFamilyEdit = function () {
     renderFamilyEdit();
 }
 
-window.closeFamilyEdit = function () {
+window.saveFamilyEdit = function () {
+    // Read edited values from inputs
+    ROUNDS.forEach((r, i) => {
+        const catInput = document.getElementById(`edit-cat-${i}`);
+        const optsInput = document.getElementById(`edit-opts-${i}`);
+        if (catInput) r.categoryName = catInput.value.trim() || r.categoryName;
+        if (optsInput) {
+            const newOpts = optsInput.value.split(',').map(s => s.trim()).filter(s => s);
+            if (newOpts.length > 0) r.options = newOpts;
+        }
+    });
+    saveRounds();
     document.getElementById('family-edit-modal').classList.add('hidden');
 }
 
@@ -53,53 +64,18 @@ function renderFamilyEdit() {
         const div = document.createElement('div');
         div.className = 'round-edit-item';
         div.innerHTML = `
-            <div>
-                <strong>${r.player}</strong> - ${r.categoryName}<br>
-                <small>${r.options.join(', ')}</small>
+            <div class="edit-round-header">
+                <span class="edit-round-name">${r.avatar} ${r.player}</span>
             </div>
-            <button class="btn-small" onclick="deleteFamilyRound(${i})" style="background:#ff6b6b; color:white">삭제</button>
+            <div class="edit-round-fields">
+                <label>카테고리</label>
+                <input type="text" id="edit-cat-${i}" value="${r.categoryName}">
+                <label>항목 (쉼표 구분)</label>
+                <input type="text" id="edit-opts-${i}" value="${r.options.join(', ')}">
+            </div>
         `;
         list.appendChild(div);
     });
-}
-
-window.deleteFamilyRound = function (idx) {
-    if (!confirm("삭제하시겠습니까?")) return;
-    ROUNDS.splice(idx, 1);
-    saveRounds();
-    renderFamilyEdit();
-}
-
-window.addNewFamilyRound = function () {
-    const p = document.getElementById('new-round-player').value.trim();
-    const c = document.getElementById('new-round-cat').value.trim();
-    const o = document.getElementById('new-round-opts').value.trim();
-
-    if (!p || !c || !o) {
-        alert("모든 항목을 입력하세요.");
-        return;
-    }
-
-    const opts = o.split(',').map(s => s.trim());
-
-    ROUNDS.push({
-        player: p,
-        avatar: "😊", // Default avatar
-        category: "CUSTOM",
-        categoryName: c,
-        categoryIcon: "⭐",
-        unit: "",
-        options: opts,
-        details: {}
-    });
-
-    saveRounds();
-    renderFamilyEdit();
-
-    // Clear inputs
-    document.getElementById('new-round-player').value = '';
-    document.getElementById('new-round-cat').value = '';
-    document.getElementById('new-round-opts').value = '';
 }
 
 function saveRounds() {

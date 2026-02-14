@@ -832,9 +832,9 @@ canvas {
 }
 
 .captured-piece {
-    width: 24px;
-    height: 24px;
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+    font-size: 1.2rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
 }
 
 .chess-board-container {
@@ -1049,21 +1049,27 @@ canvas {
 
 /* Piece Styling */
 .chess-piece {
-    width: 85%;
-    height: 85%;
-    filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.3));
+    font-size: calc(min(60vh, 90vw, 480px) / 8 * 0.7);
+    line-height: 1;
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.4));
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 10;
+    user-select: none;
+    cursor: pointer;
 }
 
-.chess-piece svg {
-    width: 100%;
-    height: 100%;
-    display: block;
+.piece-white {
+    color: #fff;
+    text-shadow: 0 0 2px #000, 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000;
+}
+
+.piece-black {
+    color: #333;
+    text-shadow: 0 0 1px rgba(0,0,0,0.3);
 }
 
 .chess-square.selected .chess-piece {
-    transform: translateY(-5px) scale(1.1);
+    transform: translateY(-5px) scale(1.15);
 }
 
 /* Animations */

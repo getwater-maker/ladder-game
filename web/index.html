@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>사다리 게임</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="stylesheet" href="css/style.css?v=6">
-    <link rel="stylesheet" href="css/goals.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=7">
+    <link rel="stylesheet" href="css/goals.css?v=7">
     <link rel="stylesheet" href="css/scheduler.css?v=5">
 </head>
 
@@ -306,15 +306,9 @@
         <!-- Family Edit Modal -->
         <div id="family-edit-modal" class="modal hidden">
             <div class="family-edit-modal">
-                <h2>가족 게임 설정</h2>
+                <h2>게임 항목 설정</h2>
                 <div id="family-round-list"></div>
-                <div class="add-round-form">
-                    <input type="text" id="new-round-player" placeholder="이름 (예: 아빠)">
-                    <input type="text" id="new-round-cat" placeholder="카테고리 (예: 설거지)">
-                    <input type="text" id="new-round-opts" placeholder="옵션 (쉼표구분: 1회,2회)">
-                    <button class="btn-small" onclick="addNewFamilyRound()">추가</button>
-                </div>
-                <button class="btn-primary" onclick="closeFamilyEdit()" style="margin-top:20px; width:100%">닫기</button>
+                <button class="btn-primary" onclick="saveFamilyEdit()" style="margin-top:20px; width:100%">저장</button>
             </div>
         </div>
 

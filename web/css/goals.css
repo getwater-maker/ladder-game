@@ -394,23 +394,34 @@
 }
 
 .round-edit-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+    border-radius: 12px;
 }
 
-.add-round-form {
+.edit-round-header {
+    margin-bottom: 10px;
+}
+
+.edit-round-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.edit-round-fields {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 2px solid #eee;
+    gap: 6px;
 }
 
-.add-round-form input {
+.edit-round-fields label {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+.edit-round-fields input {
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 8px;

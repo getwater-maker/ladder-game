@@ -5,139 +5,16 @@
 import { ref, set, onValue, update, db } from './firebase-config.js';
 
 
-// Piece SVGs (Luxury Set with Gradients)
-const PIECES_SVG = {
-    w: {
-        K: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <defs>
-                <linearGradient id="gradWhite" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#fff;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:1" />
-                </linearGradient>
-                <linearGradient id="gradGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#daa520;stop-opacity:1" />
-                </linearGradient>
-                <filter id="shadow">
-                    <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.5)"/>
-                </filter>
-            </defs>
-            <g filter="url(#shadow)">
-                <path d="M22.5 11.63V6M20 8h5" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M22.5 25s4.5-7.5 3-13.5c-3-1.5-6-1.5-6 0-1.5 6 3 13.5 3 13.5z" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-5 2-8 2s-4-3-8-3-5 3-8 3-4-3-8-2c-3 6 6 10.5 6 10.5v7z" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5"/>
-                <path d="M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0" stroke="#000" stroke-width="1.5"/>
-                <path d="M22.5 11.63V6M20 8h5" stroke="url(#gradGold)" stroke-width="1"/>
-            </g>
-        </svg>`,
-        Q: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM10.5 20.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM38.5 20.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5"/>
-                <path d="M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-13.5V25l-7-11z" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M9 26c0 2 1.5 2 2.5 4 1 2.5 12.5 2.5 12.5 2.5s11.5 0 12.5-2.5c1-2 2.5-2 2.5-4zm-1.5 4.5c5.5-3 16.5-3 22 0m-23 3c5.5-3 16.5-3 22 0m-23 3c5.5-3 16.5-3 22 0" stroke="#000" stroke-width="1.5"/>
-                <circle cx="24.5" cy="7.5" r="1.5" fill="url(#gradGold)"/>
-            </g>
-        </svg>`,
-        R: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M34 14l-3 3H14l-3-3" stroke="#000" stroke-width="1.5"/>
-                <path d="M31 17v12.5c0 1.5.5 2.5 2.5 2.5h-22c2 0 2.5-1 2.5-2.5V17" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M31 29.5c0 1.5-1 4-4 4h-9c-3 0-4-2.5-4-4" stroke="#000" stroke-width="1.5"/>
-                <path d="M11 14h23" fill="none" stroke="#000" stroke-width="1.5" stroke-linejoin="miter"/>
-            </g>
-        </svg>`,
-        B: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <g fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="butt">
-                    <path d="M9 36c3.39-.97 9.11-1.45 13.5-1.45 4.38 0 10.11.48 13.5 1.45V32c0-1.54-.78-2.31-2.93-2.91-2.09-.59-4.83-.88-6.07-.88-1.92 0-8.62.29-10.7 2.15C14.7 31.81 14.7 32.5 14.7 34v2H9z"/>
-                    <path d="M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z"/>
-                    <path d="M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z"/>
-                </g>
-                <path d="M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5" stroke="#000" stroke-width="1.5" stroke-linejoin="miter"/>
-                <path d="M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z" fill="url(#gradGold)" stroke="none"/>
-            </g>
-        </svg>`,
-        N: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5"/>
-                <path d="M24 18c.38 2.32-4.68 1.97-5 0 .38-2.32 4.68-1.97 5 0z" fill="#000" stroke="#000" stroke-width="1.5"/>
-                <path d="M9.5 25.5A4.5 4.5 0 1 1 5 21a4.5 4.5 0 0 1 4.5 4.5z" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M15 15.5c-1.66 0-3 1.34-3 3 0 1.66 1.34 3 3 3 1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3z" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M36 15c-1.5 5.5-4.5 10-8 10-2.5 0-4.5-2-4.5-5s2-4.5 4.5-5c1.1 0 2.14.33 3 .9" stroke="#000" stroke-width="1.5"/>
-            </g>
-        </svg>`,
-        P: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z" fill="url(#gradWhite)" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-            </g>
-        </svg>`
-    },
-    b: {
-        k: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <defs>
-                <linearGradient id="gradBlack" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#222;stop-opacity:1" />
-                </linearGradient>
-                <filter id="shadow">
-                    <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.5)"/>
-                </filter>
-            </defs>
-            <g filter="url(#shadow)">
-                <path d="M22.5 11.63V6M20 8h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M22.5 25s4.5-7.5 3-13.5c-3-1.5-6-1.5-6 0-1.5 6 3 13.5 3 13.5z" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-5 2-8 2s-4-3-8-3-5 3-8 3-4-3-8-2c-3 6 6 10.5 6 10.5v7z" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5"/>
-                <path d="M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0" stroke="#fff" stroke-width="1.5"/>
-            </g>
-        </svg>`,
-        q: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM10.5 20.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM38.5 20.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5"/>
-                <path d="M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-13.5V25l-7-11z" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M9 26c0 2 1.5 2 2.5 4 1 2.5 12.5 2.5 12.5 2.5s11.5 0 12.5-2.5c1-2 2.5-2 2.5-4zm-1.5 4.5c5.5-3 16.5-3 22 0m-23 3c5.5-3 16.5-3 22 0m-23 3c5.5-3 16.5-3 22 0m-23 3c5.5-3 16.5-3 22 0m-23 3c5.5-3 16.5-3 22 0" stroke="#fff" stroke-width="1.5"/>
-            </g>
-        </svg>`,
-        r: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M34 14l-3 3H14l-3-3" stroke="#fff" stroke-width="1.5"/>
-                <path d="M31 17v12.5c0 1.5.5 2.5 2.5 2.5h-22c2 0 2.5-1 2.5-2.5V17" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M31 29.5c0 1.5-1 4-4 4h-9c-3 0-4-2.5-4-4" stroke="#fff" stroke-width="1.5"/>
-                <path d="M11 14h23" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="miter"/>
-            </g>
-        </svg>`,
-        b: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <g fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="butt">
-                    <path d="M9 36c3.39-.97 9.11-1.45 13.5-1.45 4.38 0 10.11.48 13.5 1.45V32c0-1.54-.78-2.31-2.93-2.91-2.09-.59-4.83-.88-6.07-.88-1.92 0-8.62.29-10.7 2.15C14.7 31.81 14.7 32.5 14.7 34v2H9z"/>
-                    <path d="M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z"/>
-                    <path d="M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z"/>
-                </g>
-                <path d="M17.5 26h10M15 30h15m-7.5-14.5v5M20 18h5" stroke="#fff" stroke-width="1.5" stroke-linejoin="miter"/>
-            </g>
-        </svg>`,
-        n: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5"/>
-                <path d="M24 18c.38 2.32-4.68 1.97-5 0 .38-2.32 4.68-1.97 5 0z" fill="#fff" stroke="#fff" stroke-width="1.5"/>
-                <path d="M9.5 25.5A4.5 4.5 0 1 1 5 21a4.5 4.5 0 0 1 4.5 4.5z" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M15 15.5c-1.66 0-3 1.34-3 3 0 1.66 1.34 3 3 3 1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3z" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="butt"/>
-                <path d="M36 15c-1.5 5.5-4.5 10-8 10-2.5 0-4.5-2-4.5-5s2-4.5 4.5-5c1.1 0 2.14.33 3 .9" stroke="#fff" stroke-width="1.5"/>
-            </g>
-        </svg>`,
-        p: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45">
-            <g filter="url(#shadow)">
-                <path d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-3 1.06-7.41 5.55-7.41 13.47h23c0-7.92-4.41-12.41-7.41-13.47 1.47-1.19 2.41-3 2.41-5.03 0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z" fill="url(#gradBlack)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-            </g>
-        </svg>`
-    }
+// Chess piece symbols - clean Unicode with CSS styling
+const PIECE_CHARS = {
+    w: { K: '♔', Q: '♕', R: '♖', B: '♗', N: '♘', P: '♙' },
+    b: { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
 };
 
-function getPieceSVG(pieceChar) {
+function getPieceChar(pieceChar) {
     if (!pieceChar) return '';
     const color = pieceChar === pieceChar.toUpperCase() ? 'w' : 'b';
-    return PIECES_SVG[color][pieceChar] || '';
+    return PIECE_CHARS[color][pieceChar] || '';
 }
 
 // Piece values for AI evaluation
@@ -545,8 +422,9 @@ function renderChessBoard() {
             // Piece
             if (chess.board[r][c]) {
                 const pieceDiv = document.createElement('div');
-                pieceDiv.className = 'chess-piece';
-                pieceDiv.innerHTML = getPieceSVG(chess.board[r][c]);
+                const isWhite = chess.board[r][c] === chess.board[r][c].toUpperCase();
+                pieceDiv.className = `chess-piece ${isWhite ? 'piece-white' : 'piece-black'}`;
+                pieceDiv.textContent = getPieceChar(chess.board[r][c]);
 
                 // Animation for just moved piece
                 if (chess.lastMove && chess.lastMove.to.row === r && chess.lastMove.to.col === c) {
@@ -563,22 +441,22 @@ function renderChessBoard() {
         }
     }
 
-    // Captured pieces - Use SVGs
+    // Captured pieces
     const capBlackEl = document.getElementById('chess-captured-black');
     capBlackEl.innerHTML = '';
     chess.capturedBlack.forEach(p => {
-        const d = document.createElement('div');
+        const d = document.createElement('span');
         d.className = 'captured-piece';
-        d.innerHTML = getPieceSVG(p);
+        d.textContent = getPieceChar(p);
         capBlackEl.appendChild(d);
     });
 
     const capWhiteEl = document.getElementById('chess-captured-white');
     capWhiteEl.innerHTML = '';
     chess.capturedWhite.forEach(p => {
-        const d = document.createElement('div');
+        const d = document.createElement('span');
         d.className = 'captured-piece';
-        d.innerHTML = getPieceSVG(p);
+        d.textContent = getPieceChar(p);
         capWhiteEl.appendChild(d);
     });
 }
