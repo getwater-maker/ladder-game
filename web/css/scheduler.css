@@ -118,10 +118,13 @@
     position: relative;
 }
 
+.date-area {
+    flex-shrink: 0;
+}
+
 .date-label {
     text-align: center;
     font-weight: bold;
-    margin-bottom: 10px;
     padding: 5px;
     border-radius: 10px;
 }
@@ -132,10 +135,15 @@
 }
 
 .holiday-label {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #e03131;
     text-align: center;
-    margin-bottom: 5px;
+    min-height: 1.1em;
+    line-height: 1.1em;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Tasks */

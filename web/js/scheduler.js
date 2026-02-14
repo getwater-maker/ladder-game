@@ -91,37 +91,33 @@ async function renderScheduler() {
         col.className = 'day-column';
         if (countDateStr === toDateString(new Date())) col.classList.add('today');
 
-        // 1. Date Label Area (Fixed Height)
+        // 1. Date Label Area (Fixed Height for alignment)
         const dateArea = document.createElement('div');
         dateArea.className = 'date-area';
-        dateArea.style.minHeight = '60px'; // Ensure space for alignment
 
         const dateLabel = document.createElement('div');
         dateLabel.className = 'date-label';
-        // Color Sunday Red, Saturday Green
         if (d.getDay() === 0) dateLabel.classList.add('sun-text');
         if (d.getDay() === 6) dateLabel.classList.add('sat-text');
-
         dateLabel.innerText = `${d.getMonth() + 1}.${d.getDate()}`;
         dateArea.appendChild(dateLabel);
 
-        // 2. Check Holidays & Anniversaries
+        // 2. Holiday/Anniversary label (always reserve space)
         let holidayText = FIXED_HOLIDAYS[holidayKey] || FIXED_HOLIDAYS[countDateStr];
-
-        // Check Custom Anniversaries
         if (!holidayText && anniversaries) {
             const ann = anniversaries.find(a => a.date === holidayKey);
             if (ann) holidayText = ann.name;
         }
 
+        const hol = document.createElement('div');
+        hol.className = 'holiday-label';
         if (holidayText) {
-            const hol = document.createElement('div');
-            hol.className = 'holiday-label';
             hol.innerText = holidayText;
-            dateArea.appendChild(hol);
-            // If holiday, make date red?
             dateLabel.classList.add('sun-text');
+        } else {
+            hol.innerHTML = '&nbsp;';
         }
+        dateArea.appendChild(hol);
 
         col.appendChild(dateArea);
 
