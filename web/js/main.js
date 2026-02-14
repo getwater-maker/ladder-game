@@ -641,12 +641,12 @@ let taskSettings = {}; // { '한봄': [...], '한별': [...], ... }
 window.showGoals = function () {
     updateDateDisplay();
     loadTasksForChild(currentChild);
-    document.getElementById('goals-modal').classList.remove('hidden');
+    document.getElementById('scheduler-modal').classList.remove('hidden');
 };
 
 
 window.closeGoals = function () {
-    document.getElementById('goals-modal').classList.add('hidden');
+    document.getElementById('scheduler-modal').classList.add('hidden');
 };
 
 window.changeDate = function (delta) {
@@ -769,15 +769,15 @@ window.handleTaskCheck = async function (childName, taskId, reward, checked) {
 // Settings Logic
 // ============================================================
 window.openSettings = function () {
-    document.getElementById('goals-modal').classList.add('hidden');
+    document.getElementById('scheduler-modal').classList.add('hidden');
     document.getElementById('settings-modal').classList.remove('hidden');
     switchSettingsTab('한봄'); // Default
 };
 
 window.closeSettings = function () {
     document.getElementById('settings-modal').classList.add('hidden');
-    document.getElementById('goals-modal').classList.remove('hidden');
-    // Refresh the goals list to show changes
+    document.getElementById('scheduler-modal').classList.remove('hidden');
+    // Refresh the scheduler to show changes
     loadTasksForChild(currentChild);
 };
 

@@ -207,8 +207,8 @@
     grid-template-rows: repeat(15, 1fr);
     background-color: #dcb35c;
     border: 3px solid #000;
-    width: min(85vh, 85vw, 900px);
-    height: min(85vh, 85vw, 900px);
+    width: min(88vh, 90vw, 900px);
+    height: min(88vh, 90vw, 900px);
     padding: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     border-radius: 4px;
@@ -225,8 +225,7 @@
     align-items: center;
 }
 
-/* Grid Lines */
-/* Grid Lines */
+/* Grid Lines - Horizontal */
 .omok-cell::before {
     content: '';
     position: absolute;
@@ -235,142 +234,195 @@
     width: 100%;
     height: 2px;
     background: #000;
+    z-index: 0;
+    transform: translateY(-50%);
+}
 
-    /* Level Grid */
-    .level-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 15px;
-        margin-top: 20px;
-        max-width: 500px;
+/* Grid Lines - Vertical */
+.omok-cell::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: #000;
+    z-index: 0;
+    transform: translateX(-50%);
+}
+
+.omok-cell.first-col::before {
+    left: 50%;
+    width: 50%;
+}
+
+.omok-cell.last-col::before {
+    width: 50%;
+}
+
+.omok-cell.first-row::after {
+    top: 50%;
+    height: 50%;
+}
+
+.omok-cell.last-row::after {
+    height: 50%;
+}
+
+/* Pieces */
+.omok-piece {
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.omok-b {
+    background: radial-gradient(circle at 30% 30%, #444, #000);
+}
+
+.omok-w {
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+}
+
+.omok-last-move::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 40%;
+    background-color: rgba(255, 0, 0, 0.7);
+    border-radius: 50%;
+    z-index: 11;
+}
+
+/* Level Grid */
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+    max-width: 500px;
+}
+
+.level-btn {
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.level-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.l-easy {
+    color: #28a745;
+    border: 2px solid #e8f5e9;
+}
+
+.l-mid {
+    color: #ffc107;
+    border: 2px solid #fff8e1;
+}
+
+.l-hard {
+    color: #dc3545;
+    border: 2px solid #ffebee;
+}
+
+/* Omok Status Highlight */
+#omok-status.highlight {
+    font-size: 2.5rem;
+    color: #ff4081;
+    text-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
     }
 
-    .level-btn {
-        padding: 15px;
-        border: none;
-        border-radius: 12px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        background: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
+}
 
-    .level-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-    }
+/* Modal Victory Style */
+.victory-modal-content {
+    background: linear-gradient(135deg, #fff, #f3e5f5);
+    border: 4px solid gold;
+}
 
-    .l-easy {
-        color: #28a745;
-        border: 2px solid #e8f5e9;
-    }
+.victory-text {
+    font-size: 3rem;
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 20px 0;
+}
 
-    .l-mid {
-        color: #ffc107;
-        border: 2px solid #fff8e1;
-    }
+/* Game Header */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.6);
+}
 
-    .l-hard {
-        color: #dc3545;
-        border: 2px solid #ffebee;
-    }
+.game-header .controls {
+    display: flex;
+    gap: 10px;
+}
 
+/* Family Edit */
+.family-edit-modal {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
 
-    /* Omok Status Highlight */
-    #omok-status.highlight {
-        font-size: 2.5rem;
-        color: #ff4081;
-        text-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
-        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+.round-edit-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
 
-    @keyframes popIn {
-        0% {
-            transform: scale(0.5);
-            opacity: 0;
-        }
+.add-round-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #eee;
+}
 
-        100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    /* Modal Victory Style */
-    .victory-modal-content {
-        background: linear-gradient(135deg, #fff, #f3e5f5);
-        border: 4px solid gold;
-    }
-
-    .victory-text {
-        font-size: 3rem;
-        background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 20px 0;
-    }
-
-    .omok-cell::after {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 0;
-        height: 100%;
-        width: 2px;
-        background: #000;
-        z-index: 0;
-        transform: translateX(-50%);
-    }
-
-    .omok-cell.first-col::before {
-        left: 50%;
-        width: 50%;
-    }
-
-    .omok-cell.last-col::before {
-        width: 50%;
-    }
-
-    .omok-cell.first-row::after {
-        top: 50%;
-        height: 50%;
-    }
-
-    .omok-cell.last-row::after {
-        height: 50%;
-    }
-
-    /* Pieces */
-    .omok-piece {
-        width: 80%;
-        height: 80%;
-        border-radius: 50%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);
-        z-index: 10;
-    }
-
-    .omok-b {
-        background: radial-gradient(circle at 30% 30%, #444, #000);
-    }
-
-    .omok-w {
-        background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-    }
-
-    .omok-last-move::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 40%;
-        height: 40%;
-        background-color: rgba(255, 0, 0, 0.7);
-        border-radius: 50%;
-    }
+.add-round-form input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
