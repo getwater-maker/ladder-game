@@ -1,0 +1,376 @@
+/* ============================================================
+   User Profile & Login
+   ============================================================ */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.login-section {
+    margin-bottom: 30px;
+}
+
+/* ============================================================
+   Goals Modal
+   ============================================================ */
+
+/* ============================================================
+   Goals Modal & Tabs
+   ============================================================ */
+.goals-content,
+.settings-content {
+    max-width: 600px;
+    width: 90%;
+}
+
+.modal-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.child-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    border: 2px solid #ddd;
+    border-radius: 20px;
+    background: white;
+    cursor: pointer;
+    font-weight: bold;
+    color: #888;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.wallet-display {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #fff3cd;
+    border-radius: 10px;
+    color: #856404;
+}
+
+.date-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 10px 0 20px 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.date-selector button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--primary-color);
+}
+
+.goals-list,
+.settings-list {
+    display: grid;
+    gap: 15px;
+    text-align: left;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.goal-item,
+.setting-item {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    transition: background 0.2s;
+}
+
+.goal-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.goal-item:hover {
+    background: #f0f0f0;
+}
+
+.goal-checkbox {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.goal-label {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.goal-reward {
+    font-size: 0.9rem;
+    color: #28a745;
+    font-weight: bold;
+    background: #d4edda;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+/* Settings Specific */
+.add-task-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.add-task-form input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+#new-task-name {
+    flex: 2;
+}
+
+#new-task-reward {
+    flex: 1;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.delete-btn {
+    color: #dc3545;
+    background: none;
+    border: 1px solid #dc3545;
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Omok Game */
+.omok-board-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+
+.omok-board {
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+    background-color: #dcb35c;
+    border: 3px solid #000;
+    width: min(85vh, 85vw, 900px);
+    height: min(85vh, 85vw, 900px);
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+}
+
+.omok-cell {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Grid Lines */
+/* Grid Lines */
+.omok-cell::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #000;
+
+    /* Level Grid */
+    .level-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+        max-width: 500px;
+    }
+
+    .level-btn {
+        padding: 15px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .level-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .l-easy {
+        color: #28a745;
+        border: 2px solid #e8f5e9;
+    }
+
+    .l-mid {
+        color: #ffc107;
+        border: 2px solid #fff8e1;
+    }
+
+    .l-hard {
+        color: #dc3545;
+        border: 2px solid #ffebee;
+    }
+
+
+    /* Omok Status Highlight */
+    #omok-status.highlight {
+        font-size: 2.5rem;
+        color: #ff4081;
+        text-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
+        animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+        0% {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Modal Victory Style */
+    .victory-modal-content {
+        background: linear-gradient(135deg, #fff, #f3e5f5);
+        border: 4px solid gold;
+    }
+
+    .victory-text {
+        font-size: 3rem;
+        background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 20px 0;
+    }
+
+    .omok-cell::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background: #000;
+        z-index: 0;
+        transform: translateX(-50%);
+    }
+
+    .omok-cell.first-col::before {
+        left: 50%;
+        width: 50%;
+    }
+
+    .omok-cell.last-col::before {
+        width: 50%;
+    }
+
+    .omok-cell.first-row::after {
+        top: 50%;
+        height: 50%;
+    }
+
+    .omok-cell.last-row::after {
+        height: 50%;
+    }
+
+    /* Pieces */
+    .omok-piece {
+        width: 80%;
+        height: 80%;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+    }
+
+    .omok-b {
+        background: radial-gradient(circle at 30% 30%, #444, #000);
+    }
+
+    .omok-w {
+        background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+    }
+
+    .omok-last-move::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40%;
+        height: 40%;
+        background-color: rgba(255, 0, 0, 0.7);
+        border-radius: 50%;
+    }
